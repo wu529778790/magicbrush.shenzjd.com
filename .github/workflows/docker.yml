@@ -72,10 +72,10 @@ jobs:
             sudo mkdir -p /opt/baoyuimages/data
             sudo chmod 777 /opt/baoyuimages/data
             sudo docker pull "$IMAGE"
-            sudo docker stop baoyuimages || true
-            sudo docker rm baoyuimages || true
+            sudo docker stop BaoyuImages || true
+            sudo docker rm BaoyuImages || true
             sudo docker run -d \
-              --name baoyuimages \
+              --name BaoyuImages \
               --restart unless-stopped \
               -p 6668:3000 \
               -v /opt/baoyuimages/data:/app/data \
@@ -83,6 +83,6 @@ jobs:
               "$IMAGE"
             sudo docker image prune -f
             echo "=== Container Status ==="
-            sudo docker ps -a --filter name=baoyuimages
+            sudo docker ps -a --filter name=BaoyuImages
             echo "=== Container Logs ==="
-            sudo docker logs baoyuimages --tail 30
+            sudo docker logs BaoyuImages --tail 30
