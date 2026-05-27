@@ -1,4 +1,4 @@
-# Image API
+# BaoyuImages
 
 内部图片生成 API 服务，带管理界面。封装了 AI 图片生成服务商（Z.AI/智谱、小米）的接口，通过 HTTP 端点提供统一调用，数据存储在 SQLite 中。
 
@@ -40,7 +40,7 @@ docker-compose up -d
 
 | 变量 | 说明 | 默认值 |
 |------|------|--------|
-| `DATABASE_URL` | SQLite 文件路径 | `data/image-api.db` |
+| `DATABASE_URL` | SQLite 文件路径 | `data/baoyuimages.db` |
 
 API 密钥和服务商配置通过管理界面设置，无需环境变量。
 

@@ -37,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Layout style={{ minHeight: "100vh" }}>
               <Sider breakpoint="lg" collapsedWidth="0">
                 <div style={{ height: 32, margin: 16, color: "#fff", fontSize: 18, fontWeight: "bold", textAlign: "center" }}>
-                  Image API
+                  BaoyuImages
                 </div>
                 <Menu
                   theme="dark"

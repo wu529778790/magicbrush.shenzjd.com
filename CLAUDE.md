@@ -23,7 +23,7 @@ No test framework is configured.
 
 **Framework:** Next.js 16 (App Router), Ant Design 6, Tailwind CSS 4
 
-**Database:** SQLite via `better-sqlite3`, stored at `DATABASE_URL` (format: `file:/path`) or defaults to `data/image-api.db`. Tables: `api_keys`, `generation_records`, `settings`.
+**Database:** SQLite via `better-sqlite3`, stored at `DATABASE_URL` (format: `file:/path`) or defaults to `data/baoyuimages.db`. Tables: `api_keys`, `generation_records`, `settings`.
 
 **Provider pattern:** Each image provider implements `ImageProvider` interface in `src/providers/types.ts`. Providers are registered in `src/providers/index.ts` factory. Current implementations: `zai.ts` (Zhipu), `xiaomi.ts`.
 

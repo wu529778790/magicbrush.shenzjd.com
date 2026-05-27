@@ -1,7 +1,7 @@
 import Database from "better-sqlite3";
 import path from "path";
 
-const DB_PATH = process.env.DATABASE_URL?.replace("file:", "") || path.join(process.cwd(), "data", "image-api.db");
+const DB_PATH = process.env.DATABASE_URL?.replace("file:", "") || path.join(process.cwd(), "data", "baoyuimages.db");
 
 let db: Database.Database;
 

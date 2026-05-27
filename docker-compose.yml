@@ -1,10 +1,10 @@
 services:
-  image-api:
+  baoyuimages:
     build: .
     ports:
       - "3000:3000"
     volumes:
       - ./data:/app/data
     environment:
-      - DATABASE_URL=file:/app/data/image-api.db
+      - DATABASE_URL=file:/app/data/baoyuimages.db
     restart: unless-stopped
