@@ -1,15 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deleteKey, toggleKey } from "@/lib/db";
 
+function parseId(idStr: string): number | null {
+  const id = Number(idStr);
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+
 export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  deleteKey(Number(id));
+  const { id: idStr } = await params;
+  const id = parseId(idStr);
+  if (id === null) {
+    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+  }
+  deleteKey(id);
   return NextResponse.json({ success: true });
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+  const { id: idStr } = await params;
+  const id = parseId(idStr);
+  if (id === null) {
+    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+  }
   const { is_active } = await request.json();
-  toggleKey(Number(id), is_active);
+  toggleKey(id, is_active);
   return NextResponse.json({ success: true });
 }

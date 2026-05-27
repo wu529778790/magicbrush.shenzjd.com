@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button, Card, Col, Form, Input, Row, Select, Typography, message } from "antd";
 import { SaveOutlined } from "@ant-design/icons";
 
@@ -24,13 +24,24 @@ const PROVIDERS: ProviderConfig[] = [
       { key: "zai_model", label: "模型", placeholder: "glm-image" },
     ],
   },
+  {
+    name: "xiaomi",
+    label: "小米",
+    color: "#16a34a",
+    fields: [
+      { key: "xiaomi_api_key", label: "API Key", placeholder: "输入小米 API Key", type: "password" },
+      { key: "xiaomi_base_url", label: "Base URL", placeholder: "https://api.xiaomi.com/v1" },
+      { key: "xiaomi_model", label: "模型", placeholder: "xiaomi-image" },
+    ],
+  },
 ];
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(false);
   const [globalForm] = Form.useForm();
   const [zaiForm] = Form.useForm();
-  const providerForms: Record<string, ReturnType<typeof Form.useForm>[0]> = { zai: zaiForm };
+  const [xiaomiForm] = Form.useForm();
+  const providerForms = useMemo<Record<string, ReturnType<typeof Form.useForm>[0]>>(() => ({ zai: zaiForm, xiaomi: xiaomiForm }), [zaiForm, xiaomiForm]);
 
   useEffect(() => {
     fetch("/api/settings")

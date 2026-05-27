@@ -53,6 +53,11 @@ function initSchema(db: Database.Database) {
       value TEXT
     );
   `);
+
+  // Clean up records stuck in 'pending' for more than 10 minutes (e.g. from a crash)
+  db.prepare(
+    "UPDATE generation_records SET status = 'failed', error_message = 'Process interrupted' WHERE status = 'pending' AND created_at < datetime('now', '-10 minutes')"
+  ).run();
 }
 
 // API Keys
@@ -71,6 +76,11 @@ export function getAllKeys(): ApiKey[] {
 
 export function getActiveKeyByProvider(provider: string): ApiKey | undefined {
   return getDb().prepare("SELECT * FROM api_keys WHERE provider = ? AND is_active = 1 LIMIT 1").get(provider) as ApiKey | undefined;
+}
+
+export function getKeyIdByProviderAndKey(provider: string, apiKey: string): number | null {
+  const row = getDb().prepare("SELECT id FROM api_keys WHERE provider = ? AND api_key = ? LIMIT 1").get(provider, apiKey) as { id: number } | undefined;
+  return row?.id ?? null;
 }
 
 export function addKey(name: string, provider: string, apiKey: string): ApiKey {

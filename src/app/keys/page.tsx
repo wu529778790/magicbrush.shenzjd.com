@@ -36,23 +36,41 @@ export default function KeysPage() {
   };
 
   useEffect(() => {
-    fetchKeys();
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/keys");
+        if (!res.ok) throw new Error("Failed to load");
+        const data = await res.json();
+        if (!cancelled) setKeys(Array.isArray(data) ? data : []);
+      } catch {
+        if (!cancelled) message.error("加载 API 密钥失败");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   const handleAdd = async (values: { name: string; provider: string; api_key: string }) => {
-    const res = await fetch("/api/keys", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
+    try {
+      const res = await fetch("/api/keys", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
 
-    if (res.ok) {
-      message.success("密钥已添加");
-      setModalOpen(false);
-      form.resetFields();
-      fetchKeys();
-    } else {
-      message.error("添加失败");
+      if (res.ok) {
+        message.success("密钥已添加");
+        setModalOpen(false);
+        form.resetFields();
+        fetchKeys();
+      } else {
+        message.error("添加失败");
+      }
+    } catch {
+      message.error("网络错误，添加失败");
     }
   };
 
@@ -75,15 +93,19 @@ export default function KeysPage() {
   };
 
   const handleToggle = async (id: number, checked: boolean) => {
-    const res = await fetch(`/api/keys/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ is_active: checked }),
-    });
-    if (res.ok) {
-      fetchKeys();
-    } else {
-      message.error("更新失败");
+    try {
+      const res = await fetch(`/api/keys/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_active: checked }),
+      });
+      if (res.ok) {
+        fetchKeys();
+      } else {
+        message.error("更新失败");
+      }
+    } catch {
+      message.error("网络错误，更新失败");
     }
   };
 

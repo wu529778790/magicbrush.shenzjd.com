@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSetting, getActiveKeyByProvider, addRecord, updateRecord } from "@/lib/db";
+import { getSetting, getActiveKeyByProvider, getKeyIdByProviderAndKey, addRecord, updateRecord } from "@/lib/db";
 import { createProvider } from "@/providers";
 import type { Provider } from "@/providers";
 
@@ -8,12 +8,18 @@ const DEFAULT_MODELS: Record<Provider, string> = {
   xiaomi: "xiaomi-image",
 };
 
+const VALID_PROVIDERS: Provider[] = ["zai", "xiaomi"];
+
 export async function POST(request: NextRequest) {
   const body = await request.json();
   const { prompt, provider: requestedProvider, model, ar, quality } = body;
 
   if (!prompt) {
     return NextResponse.json({ error: "prompt is required" }, { status: 400 });
+  }
+
+  if (requestedProvider && !VALID_PROVIDERS.includes(requestedProvider)) {
+    return NextResponse.json({ error: `Invalid provider: ${requestedProvider}. Must be one of: ${VALID_PROVIDERS.join(", ")}` }, { status: 400 });
   }
 
   // Resolve provider: from request > from settings > auto-detect from api_keys
@@ -56,6 +62,7 @@ export async function POST(request: NextRequest) {
   const baseUrl = getSetting(`${providerName}_base_url`) || undefined;
 
   const record = addRecord({
+    api_key_id: getKeyIdByProviderAndKey(providerName, apiKey),
     provider: providerName,
     model: resolvedModel,
     prompt,

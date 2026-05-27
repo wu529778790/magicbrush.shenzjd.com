@@ -13,7 +13,6 @@
  */
 
 import type { GenerateImageOptions, ImageProvider, Provider } from "./types";
-import { ProviderError } from "./types";
 import { ZaiProvider } from "./zai";
 import { XiaomiProvider } from "./xiaomi";
 

@@ -5,7 +5,7 @@ import { Card, Select, Space, Table, Tag, Typography, message } from "antd";
 
 const { Title } = Typography;
 
-interface Record {
+interface GenerationRecordItem {
   id: number;
   provider: string;
   model: string | null;
@@ -17,34 +17,36 @@ interface Record {
 }
 
 export default function RecordsPage() {
-  const [records, setRecords] = useState<Record[]>([]);
+  const [records, setRecords] = useState<GenerationRecordItem[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [providerFilter, setProviderFilter] = useState<string | undefined>();
   const [statusFilter, setStatusFilter] = useState<string | undefined>();
 
-  const fetchRecords = async () => {
-    setLoading(true);
-    const params = new URLSearchParams({ page: String(page), pageSize: "20" });
-    if (providerFilter) params.set("provider", providerFilter);
-    if (statusFilter) params.set("status", statusFilter);
-
-    try {
-      const res = await fetch(`/api/records?${params}`);
-      if (!res.ok) throw new Error("Failed to load");
-      const data = await res.json();
-      setRecords(data.records || []);
-      setTotal(data.total || 0);
-    } catch {
-      message.error("加载记录失败");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchRecords();
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const params = new URLSearchParams({ page: String(page), pageSize: "20" });
+      if (providerFilter) params.set("provider", providerFilter);
+      if (statusFilter) params.set("status", statusFilter);
+
+      try {
+        const res = await fetch(`/api/records?${params}`);
+        if (!res.ok) throw new Error("Failed to load");
+        const data = await res.json();
+        if (!cancelled) {
+          setRecords(data.records || []);
+          setTotal(data.total || 0);
+        }
+      } catch {
+        if (!cancelled) message.error("加载记录失败");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
   }, [page, providerFilter, statusFilter]);
 
   const columns = [
