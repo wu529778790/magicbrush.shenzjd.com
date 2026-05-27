@@ -65,7 +65,7 @@ jobs:
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_KEY }}
+          password: ${{ secrets.DEPLOY_PASSWORD }}
           script: |
             IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
             docker pull "$IMAGE"
