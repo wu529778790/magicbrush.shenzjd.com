@@ -54,3 +54,28 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+            docker pull "$IMAGE"
+            docker stop baoyuimages || true
+            docker rm baoyuimages || true
+            docker run -d \
+              --name baoyuimages \
+              --restart unless-stopped \
+              -p 3000:3000 \
+              -v /opt/baoyuimages/data:/app/data \
+              -e DATABASE_URL=file:/app/data/baoyuimages.db \
+              "$IMAGE"
+            docker image prune -f
