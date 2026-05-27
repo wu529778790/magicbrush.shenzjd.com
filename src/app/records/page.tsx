@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, Select, Space, Table, Tag, Typography } from "antd";
+import { Card, Select, Space, Table, Tag, Typography, message } from "antd";
 
 const { Title } = Typography;
 
@@ -30,11 +30,17 @@ export default function RecordsPage() {
     if (providerFilter) params.set("provider", providerFilter);
     if (statusFilter) params.set("status", statusFilter);
 
-    const res = await fetch(`/api/records?${params}`);
-    const data = await res.json();
-    setRecords(data.records);
-    setTotal(data.total);
-    setLoading(false);
+    try {
+      const res = await fetch(`/api/records?${params}`);
+      if (!res.ok) throw new Error("Failed to load");
+      const data = await res.json();
+      setRecords(data.records || []);
+      setTotal(data.total || 0);
+    } catch {
+      message.error("Failed to load records");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

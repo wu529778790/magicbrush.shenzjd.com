@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button, Card, Form, Input, Modal, Switch, Table, Typography, message, Tag } from "antd";
+import { Button, Card, Form, Input, Modal, Select, Switch, Table, Typography, message, Tag } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
@@ -23,10 +23,16 @@ export default function KeysPage() {
 
   const fetchKeys = async () => {
     setLoading(true);
-    const res = await fetch("/api/keys");
-    const data = await res.json();
-    setKeys(data);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/keys");
+      if (!res.ok) throw new Error("Failed to load");
+      const data = await res.json();
+      setKeys(Array.isArray(data) ? data : []);
+    } catch {
+      message.error("Failed to load API keys");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -55,20 +61,28 @@ export default function KeysPage() {
       title: "Delete this API key?",
       okButtonProps: { danger: true },
       onOk: async () => {
-        await fetch(`/api/keys/${id}`, { method: "DELETE" });
-        message.success("Deleted");
-        fetchKeys();
+        const res = await fetch(`/api/keys/${id}`, { method: "DELETE" });
+        if (res.ok) {
+          message.success("Deleted");
+          fetchKeys();
+        } else {
+          message.error("Failed to delete");
+        }
       },
     });
   };
 
   const handleToggle = async (id: number, checked: boolean) => {
-    await fetch(`/api/keys/${id}`, {
+    const res = await fetch(`/api/keys/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ is_active: checked }),
     });
-    fetchKeys();
+    if (res.ok) {
+      fetchKeys();
+    } else {
+      message.error("Failed to update");
+    }
   };
 
   const columns = [
@@ -121,7 +135,10 @@ export default function KeysPage() {
             <Input placeholder="e.g. My Z.AI Key" />
           </Form.Item>
           <Form.Item name="provider" label={<span style={{ fontWeight: 500 }}>Provider</span>} rules={[{ required: true }]}>
-            <Input placeholder="zai or xiaomi" />
+            <Select placeholder="Select provider">
+              <Select.Option value="zai">Z.AI (智谱)</Select.Option>
+              <Select.Option value="xiaomi">Xiaomi</Select.Option>
+            </Select>
           </Form.Item>
           <Form.Item name="api_key" label={<span style={{ fontWeight: 500 }}>API Key</span>} rules={[{ required: true }]}>
             <Input.Password placeholder="Enter API key" />

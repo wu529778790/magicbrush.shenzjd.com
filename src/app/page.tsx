@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, Col, Row, Statistic, Table, Typography } from "antd";
+import { Button, Card, Col, Row, Statistic, Table, Typography } from "antd";
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
@@ -29,12 +29,28 @@ const statCards = [
 
 export default function Dashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     fetch("/api/stats")
-      .then((res) => res.json())
-      .then(setStats);
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load");
+        return res.json();
+      })
+      .then(setStats)
+      .catch(() => setError(true));
   }, []);
+
+  if (error) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "60vh" }}>
+        <div style={{ textAlign: "center", color: "#dc2626" }}>
+          <div>Failed to load dashboard data</div>
+          <Button onClick={() => window.location.reload()} style={{ marginTop: 16 }}>Retry</Button>
+        </div>
+      </div>
+    );
+  }
 
   if (!stats) {
     return (

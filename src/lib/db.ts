@@ -7,12 +7,14 @@ let db: Database.Database;
 
 export function getDb(): Database.Database {
   if (!db) {
+    const tempDb = new Database(DB_PATH);
     try {
-      db = new Database(DB_PATH);
-      db.pragma("journal_mode = WAL");
-      db.pragma("foreign_keys = ON");
-      initSchema();
+      tempDb.pragma("journal_mode = WAL");
+      tempDb.pragma("foreign_keys = ON");
+      initSchema(tempDb);
+      db = tempDb;
     } catch (error) {
+      tempDb.close();
       const message = error instanceof Error ? error.message : "Unknown error";
       throw new Error(`Database initialization failed (path: ${DB_PATH}): ${message}`);
     }
@@ -20,7 +22,7 @@ export function getDb(): Database.Database {
   return db;
 }
 
-function initSchema() {
+function initSchema(db: Database.Database) {
   db.exec(`
     CREATE TABLE IF NOT EXISTS api_keys (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
