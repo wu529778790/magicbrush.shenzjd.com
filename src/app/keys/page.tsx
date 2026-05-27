@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button, Card, Form, Input, Modal, Switch, Table, Typography, message, Space, Tag } from "antd";
+import { Button, Card, Form, Input, Modal, Switch, Table, Typography, message, Tag } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
@@ -53,6 +53,7 @@ export default function KeysPage() {
   const handleDelete = async (id: number) => {
     Modal.confirm({
       title: "Delete this API key?",
+      okButtonProps: { danger: true },
       onOk: async () => {
         await fetch(`/api/keys/${id}`, { method: "DELETE" });
         message.success("Deleted");
@@ -82,7 +83,7 @@ export default function KeysPage() {
       title: "API Key",
       dataIndex: "api_key",
       key: "api_key",
-      render: (v: string) => v.slice(0, 8) + "****" + v.slice(-4),
+      render: (v: string) => <span style={{ fontFamily: "monospace" }}>{v.slice(0, 8)}****{v.slice(-4)}</span>,
     },
     {
       title: "Active",
@@ -103,26 +104,26 @@ export default function KeysPage() {
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
-        <Title level={2} style={{ margin: 0 }}>API Keys</Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+        <Title level={3} style={{ margin: 0, fontWeight: 600 }}>API Keys</Title>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)} style={{ borderRadius: 8 }}>
           Add Key
         </Button>
       </div>
 
-      <Card>
+      <Card bordered={false} style={{ borderRadius: 12 }}>
         <Table dataSource={keys} columns={columns} rowKey="id" loading={loading} />
       </Card>
 
       <Modal title="Add API Key" open={modalOpen} onCancel={() => setModalOpen(false)} onOk={() => form.submit()}>
         <Form form={form} layout="vertical" onFinish={handleAdd}>
-          <Form.Item name="name" label="Name" rules={[{ required: true }]}>
+          <Form.Item name="name" label={<span style={{ fontWeight: 500 }}>Name</span>} rules={[{ required: true }]}>
             <Input placeholder="e.g. My Z.AI Key" />
           </Form.Item>
-          <Form.Item name="provider" label="Provider" rules={[{ required: true }]}>
+          <Form.Item name="provider" label={<span style={{ fontWeight: 500 }}>Provider</span>} rules={[{ required: true }]}>
             <Input placeholder="zai or xiaomi" />
           </Form.Item>
-          <Form.Item name="api_key" label="API Key" rules={[{ required: true }]}>
+          <Form.Item name="api_key" label={<span style={{ fontWeight: 500 }}>API Key</span>} rules={[{ required: true }]}>
             <Input.Password placeholder="Enter API key" />
           </Form.Item>
         </Form>

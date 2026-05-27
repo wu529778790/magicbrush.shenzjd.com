@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button, Card, Col, Form, Input, Row, Select, Typography, message } from "antd";
+import { Button, Card, Col, Form, Input, Row, Select, Typography, message, Divider } from "antd";
+import { SaveOutlined } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
 
@@ -16,7 +17,7 @@ const PROVIDERS: ProviderConfig[] = [
   {
     name: "zai",
     label: "Z.AI (智谱)",
-    color: "#1677ff",
+    color: "#4f46e5",
     fields: [
       { key: "zai_api_key", label: "API Key", placeholder: "输入智谱 API Key", type: "password" },
       { key: "zai_base_url", label: "Base URL", placeholder: "https://api.z.ai/api/paas/v4" },
@@ -87,13 +88,17 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <Title level={2}>Settings</Title>
+      <Title level={3} style={{ marginBottom: 24, fontWeight: 600 }}>Settings</Title>
 
-      <Card title="Global" style={{ maxWidth: 600, marginBottom: 24 }}>
+      <Card
+        title={<span style={{ fontWeight: 500 }}>Global Defaults</span>}
+        bordered={false}
+        style={{ borderRadius: 12, marginBottom: 24, maxWidth: 700 }}
+      >
         <Form form={globalForm} layout="vertical" onFinish={handleSaveGlobal}>
           <Row gutter={16}>
             <Col span={8}>
-              <Form.Item name="default_provider" label="Default Provider">
+              <Form.Item name="default_provider" label={<span style={{ fontWeight: 500 }}>Default Provider</span>}>
                 <Select allowClear placeholder="Auto-detect">
                   {PROVIDERS.map((p) => (
                     <Select.Option key={p.name} value={p.name}>{p.label}</Select.Option>
@@ -102,7 +107,7 @@ export default function SettingsPage() {
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="default_quality" label="Default Quality">
+              <Form.Item name="default_quality" label={<span style={{ fontWeight: 500 }}>Default Quality</span>}>
                 <Select allowClear placeholder="2k">
                   <Select.Option value="normal">Normal</Select.Option>
                   <Select.Option value="2k">2K</Select.Option>
@@ -110,7 +115,7 @@ export default function SettingsPage() {
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="default_ar" label="Default Aspect Ratio">
+              <Form.Item name="default_ar" label={<span style={{ fontWeight: 500 }}>Default Aspect Ratio</span>}>
                 <Select allowClear placeholder="1:1">
                   <Select.Option value="1:1">1:1</Select.Option>
                   <Select.Option value="16:9">16:9</Select.Option>
@@ -120,8 +125,14 @@ export default function SettingsPage() {
               </Form.Item>
             </Col>
           </Row>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading}>
+          <Form.Item style={{ marginBottom: 0 }}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              icon={<SaveOutlined />}
+              style={{ borderRadius: 8 }}
+            >
               Save Global Settings
             </Button>
           </Form.Item>
@@ -131,17 +142,36 @@ export default function SettingsPage() {
       {PROVIDERS.map((provider) => (
         <Card
           key={provider.name}
-          title={<Text strong>{provider.label}</Text>}
+          bordered={false}
+          style={{ borderRadius: 12, marginBottom: 24, maxWidth: 700 }}
+          title={
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div
+                style={{
+                  width: 8,
+                  height: 32,
+                  borderRadius: 4,
+                  background: provider.color,
+                }}
+              />
+              <span style={{ fontWeight: 500 }}>{provider.label}</span>
+            </div>
+          }
           extra={
-            <Button type="primary" loading={loading} onClick={() => handleSaveProvider(provider)}>
+            <Button
+              type="primary"
+              loading={loading}
+              onClick={() => handleSaveProvider(provider)}
+              icon={<SaveOutlined />}
+              style={{ borderRadius: 8 }}
+            >
               Save
             </Button>
           }
-          style={{ maxWidth: 600, marginBottom: 24 }}
         >
           <Form form={providerForms[provider.name]} layout="vertical">
             {provider.fields.map((field) => (
-              <Form.Item key={field.key} name={field.key} label={field.label}>
+              <Form.Item key={field.key} name={field.key} label={<span style={{ fontWeight: 500 }}>{field.label}</span>}>
                 {field.type === "password" ? (
                   <Input.Password placeholder={field.placeholder} />
                 ) : (

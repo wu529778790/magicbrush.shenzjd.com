@@ -76,13 +76,13 @@ export default function RecordsPage() {
 
   return (
     <div>
-      <Title level={2}>Generation Records</Title>
-      <Card style={{ marginBottom: 16 }}>
+      <Title level={3} style={{ marginBottom: 24, fontWeight: 600 }}>Generation Records</Title>
+      <Card bordered={false} style={{ borderRadius: 12, marginBottom: 16 }}>
         <Space>
           <Select
             allowClear
             placeholder="Provider"
-            style={{ width: 120 }}
+            style={{ width: 140 }}
             onChange={setProviderFilter}
             options={[
               { value: "zai", label: "Z.AI" },
@@ -92,7 +92,7 @@ export default function RecordsPage() {
           <Select
             allowClear
             placeholder="Status"
-            style={{ width: 120 }}
+            style={{ width: 140 }}
             onChange={setStatusFilter}
             options={[
               { value: "success", label: "Success" },
@@ -102,7 +102,7 @@ export default function RecordsPage() {
           />
         </Space>
       </Card>
-      <Card>
+      <Card bordered={false} style={{ borderRadius: 12 }}>
         <Table
           dataSource={records}
           columns={columns}
