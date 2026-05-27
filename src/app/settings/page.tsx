@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button, Card, Col, Form, Input, Row, Select, Typography, message, Divider } from "antd";
+import { Button, Card, Col, Form, Input, Row, Select, Typography, message } from "antd";
 import { SaveOutlined } from "@ant-design/icons";
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 interface ProviderConfig {
   name: string;
@@ -21,7 +21,7 @@ const PROVIDERS: ProviderConfig[] = [
     fields: [
       { key: "zai_api_key", label: "API Key", placeholder: "输入智谱 API Key", type: "password" },
       { key: "zai_base_url", label: "Base URL", placeholder: "https://api.z.ai/api/paas/v4" },
-      { key: "zai_model", label: "Model", placeholder: "glm-image" },
+      { key: "zai_model", label: "模型", placeholder: "glm-image" },
     ],
   },
 ];
@@ -60,9 +60,9 @@ export default function SettingsPage() {
       body: JSON.stringify(values),
     });
     if (res.ok) {
-      message.success("Global settings saved");
+      message.success("全局设置已保存");
     } else {
-      message.error("Failed to save");
+      message.error("保存失败");
     }
     setLoading(false);
   };
@@ -79,27 +79,27 @@ export default function SettingsPage() {
       body: JSON.stringify(values),
     });
     if (res.ok) {
-      message.success(`${provider.label} settings saved`);
+      message.success(`${provider.label} 设置已保存`);
     } else {
-      message.error("Failed to save");
+      message.error("保存失败");
     }
     setLoading(false);
   };
 
   return (
     <div>
-      <Title level={3} style={{ marginBottom: 24, fontWeight: 600 }}>Settings</Title>
+      <Title level={3} style={{ marginBottom: 24, fontWeight: 600 }}>设置</Title>
 
       <Card
-        title={<span style={{ fontWeight: 500 }}>Global Defaults</span>}
+        title={<span style={{ fontWeight: 500 }}>全局默认</span>}
         bordered={false}
         style={{ borderRadius: 12, marginBottom: 24, maxWidth: 700 }}
       >
         <Form form={globalForm} layout="vertical" onFinish={handleSaveGlobal}>
           <Row gutter={16}>
             <Col span={8}>
-              <Form.Item name="default_provider" label={<span style={{ fontWeight: 500 }}>Default Provider</span>}>
-                <Select allowClear placeholder="Auto-detect">
+              <Form.Item name="default_provider" label={<span style={{ fontWeight: 500 }}>默认服务商</span>}>
+                <Select allowClear placeholder="自动检测">
                   {PROVIDERS.map((p) => (
                     <Select.Option key={p.name} value={p.name}>{p.label}</Select.Option>
                   ))}
@@ -107,15 +107,15 @@ export default function SettingsPage() {
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="default_quality" label={<span style={{ fontWeight: 500 }}>Default Quality</span>}>
+              <Form.Item name="default_quality" label={<span style={{ fontWeight: 500 }}>默认质量</span>}>
                 <Select allowClear placeholder="2k">
-                  <Select.Option value="normal">Normal</Select.Option>
+                  <Select.Option value="normal">普通</Select.Option>
                   <Select.Option value="2k">2K</Select.Option>
                 </Select>
               </Form.Item>
             </Col>
             <Col span={8}>
-              <Form.Item name="default_ar" label={<span style={{ fontWeight: 500 }}>Default Aspect Ratio</span>}>
+              <Form.Item name="default_ar" label={<span style={{ fontWeight: 500 }}>默认宽高比</span>}>
                 <Select allowClear placeholder="1:1">
                   <Select.Option value="1:1">1:1</Select.Option>
                   <Select.Option value="16:9">16:9</Select.Option>
@@ -126,14 +126,8 @@ export default function SettingsPage() {
             </Col>
           </Row>
           <Form.Item style={{ marginBottom: 0 }}>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              icon={<SaveOutlined />}
-              style={{ borderRadius: 8 }}
-            >
-              Save Global Settings
+            <Button type="primary" htmlType="submit" loading={loading} icon={<SaveOutlined />} style={{ borderRadius: 8 }}>
+              保存全局设置
             </Button>
           </Form.Item>
         </Form>
@@ -146,26 +140,13 @@ export default function SettingsPage() {
           style={{ borderRadius: 12, marginBottom: 24, maxWidth: 700 }}
           title={
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div
-                style={{
-                  width: 8,
-                  height: 32,
-                  borderRadius: 4,
-                  background: provider.color,
-                }}
-              />
+              <div style={{ width: 8, height: 32, borderRadius: 4, background: provider.color }} />
               <span style={{ fontWeight: 500 }}>{provider.label}</span>
             </div>
           }
           extra={
-            <Button
-              type="primary"
-              loading={loading}
-              onClick={() => handleSaveProvider(provider)}
-              icon={<SaveOutlined />}
-              style={{ borderRadius: 8 }}
-            >
-              Save
+            <Button type="primary" loading={loading} onClick={() => handleSaveProvider(provider)} icon={<SaveOutlined />} style={{ borderRadius: 8 }}>
+              保存
             </Button>
           }
         >

@@ -16,11 +16,11 @@ const { Sider, Content } = Layout;
 const { Text } = Typography;
 
 const menuItems = [
-  { key: "/", icon: <HomeOutlined />, label: <Link href="/">Dashboard</Link> },
-  { key: "/generate", icon: <PictureOutlined />, label: <Link href="/generate">Generate</Link> },
-  { key: "/keys", icon: <KeyOutlined />, label: <Link href="/keys">API Keys</Link> },
-  { key: "/records", icon: <HistoryOutlined />, label: <Link href="/records">Records</Link> },
-  { key: "/settings", icon: <SettingOutlined />, label: <Link href="/settings">Settings</Link> },
+  { key: "/", icon: <HomeOutlined />, label: <Link href="/">仪表盘</Link> },
+  { key: "/generate", icon: <PictureOutlined />, label: <Link href="/generate">生成图片</Link> },
+  { key: "/keys", icon: <KeyOutlined />, label: <Link href="/keys">API 密钥</Link> },
+  { key: "/records", icon: <HistoryOutlined />, label: <Link href="/records">生成记录</Link> },
+  { key: "/settings", icon: <SettingOutlined />, label: <Link href="/settings">设置</Link> },
 ];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

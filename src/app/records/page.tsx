@@ -37,7 +37,7 @@ export default function RecordsPage() {
       setRecords(data.records || []);
       setTotal(data.total || 0);
     } catch {
-      message.error("Failed to load records");
+      message.error("加载记录失败");
     } finally {
       setLoading(false);
     }
@@ -50,60 +50,62 @@ export default function RecordsPage() {
   const columns = [
     { title: "ID", dataIndex: "id", key: "id", width: 60 },
     {
-      title: "Provider",
+      title: "服务商",
       dataIndex: "provider",
       key: "provider",
       render: (v: string) => <Tag>{v}</Tag>,
     },
-    { title: "Model", dataIndex: "model", key: "model" },
+    { title: "模型", dataIndex: "model", key: "model" },
     {
-      title: "Prompt",
+      title: "提示词",
       dataIndex: "prompt",
       key: "prompt",
       ellipsis: true,
       width: 300,
     },
     {
-      title: "Status",
+      title: "状态",
       dataIndex: "status",
       key: "status",
       render: (v: string) => (
-        <Tag color={v === "success" ? "green" : v === "failed" ? "red" : "blue"}>{v}</Tag>
+        <Tag color={v === "success" ? "green" : v === "failed" ? "red" : "blue"}>
+          {v === "success" ? "成功" : v === "failed" ? "失败" : "进行中"}
+        </Tag>
       ),
     },
     {
-      title: "Duration",
+      title: "耗时",
       dataIndex: "duration_ms",
       key: "duration_ms",
       render: (v: number | null) => (v ? `${v}ms` : "-"),
     },
-    { title: "Time", dataIndex: "created_at", key: "created_at" },
+    { title: "时间", dataIndex: "created_at", key: "created_at" },
   ];
 
   return (
     <div>
-      <Title level={3} style={{ marginBottom: 24, fontWeight: 600 }}>Generation Records</Title>
+      <Title level={3} style={{ marginBottom: 24, fontWeight: 600 }}>生成记录</Title>
       <Card bordered={false} style={{ borderRadius: 12, marginBottom: 16 }}>
         <Space>
           <Select
             allowClear
-            placeholder="Provider"
+            placeholder="服务商"
             style={{ width: 140 }}
             onChange={setProviderFilter}
             options={[
               { value: "zai", label: "Z.AI" },
-              { value: "xiaomi", label: "Xiaomi" },
+              { value: "xiaomi", label: "小米" },
             ]}
           />
           <Select
             allowClear
-            placeholder="Status"
+            placeholder="状态"
             style={{ width: 140 }}
             onChange={setStatusFilter}
             options={[
-              { value: "success", label: "Success" },
-              { value: "failed", label: "Failed" },
-              { value: "pending", label: "Pending" },
+              { value: "success", label: "成功" },
+              { value: "failed", label: "失败" },
+              { value: "pending", label: "进行中" },
             ]}
           />
         </Space>

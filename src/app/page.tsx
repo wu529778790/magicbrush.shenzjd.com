@@ -21,10 +21,10 @@ interface Stats {
 }
 
 const statCards = [
-  { key: "totalGenerations", title: "Total Generations", icon: <ThunderboltOutlined />, color: "#4f46e5", bg: "#eef2ff" },
-  { key: "successCount", title: "Success", icon: <CheckCircleOutlined />, color: "#16a34a", bg: "#f0fdf4" },
-  { key: "failCount", title: "Failed", icon: <CloseCircleOutlined />, color: "#dc2626", bg: "#fef2f2" },
-  { key: "todayCount", title: "Today", icon: <ClockCircleOutlined />, color: "#ea580c", bg: "#fff7ed" },
+  { key: "totalGenerations", title: "总生成次数", icon: <ThunderboltOutlined />, color: "#4f46e5", bg: "#eef2ff" },
+  { key: "successCount", title: "成功", icon: <CheckCircleOutlined />, color: "#16a34a", bg: "#f0fdf4" },
+  { key: "failCount", title: "失败", icon: <CloseCircleOutlined />, color: "#dc2626", bg: "#fef2f2" },
+  { key: "todayCount", title: "今日生成", icon: <ClockCircleOutlined />, color: "#ea580c", bg: "#fff7ed" },
 ] as const;
 
 export default function Dashboard() {
@@ -45,8 +45,8 @@ export default function Dashboard() {
     return (
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "60vh" }}>
         <div style={{ textAlign: "center", color: "#dc2626" }}>
-          <div>Failed to load dashboard data</div>
-          <Button onClick={() => window.location.reload()} style={{ marginTop: 16 }}>Retry</Button>
+          <div>加载仪表盘数据失败</div>
+          <Button onClick={() => window.location.reload()} style={{ marginTop: 16 }}>重试</Button>
         </div>
       </div>
     );
@@ -57,7 +57,7 @@ export default function Dashboard() {
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "60vh" }}>
         <div style={{ textAlign: "center", color: "#94a3b8" }}>
           <ThunderboltOutlined style={{ fontSize: 48, marginBottom: 16 }} />
-          <div>Loading...</div>
+          <div>加载中...</div>
         </div>
       </div>
     );
@@ -65,7 +65,7 @@ export default function Dashboard() {
 
   return (
     <div>
-      <Title level={3} style={{ marginBottom: 24, fontWeight: 600 }}>Dashboard</Title>
+      <Title level={3} style={{ marginBottom: 24, fontWeight: 600 }}>仪表盘</Title>
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         {statCards.map(({ key, title, icon, color, bg }) => (
           <Col xs={12} sm={6} key={key}>
@@ -103,11 +103,7 @@ export default function Dashboard() {
 
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12}>
-          <Card
-            title="Avg Duration"
-            bordered={false}
-            style={{ borderRadius: 12 }}
-          >
+          <Card title="平均耗时" bordered={false} style={{ borderRadius: 12 }}>
             <Statistic
               value={stats.avgDurationMs}
               suffix="ms"
@@ -116,19 +112,15 @@ export default function Dashboard() {
           </Card>
         </Col>
         <Col xs={24} sm={12}>
-          <Card
-            title="Provider Usage"
-            bordered={false}
-            style={{ borderRadius: 12 }}
-          >
+          <Card title="服务商使用统计" bordered={false} style={{ borderRadius: 12 }}>
             <Table
               dataSource={stats.providerStats}
               rowKey="provider"
               pagination={false}
               size="small"
               columns={[
-                { title: "Provider", dataIndex: "provider", key: "provider" },
-                { title: "Count", dataIndex: "count", key: "count" },
+                { title: "服务商", dataIndex: "provider", key: "provider" },
+                { title: "次数", dataIndex: "count", key: "count" },
               ]}
             />
           </Card>

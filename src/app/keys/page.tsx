@@ -29,7 +29,7 @@ export default function KeysPage() {
       const data = await res.json();
       setKeys(Array.isArray(data) ? data : []);
     } catch {
-      message.error("Failed to load API keys");
+      message.error("加载 API 密钥失败");
     } finally {
       setLoading(false);
     }
@@ -47,26 +47,28 @@ export default function KeysPage() {
     });
 
     if (res.ok) {
-      message.success("Key added");
+      message.success("密钥已添加");
       setModalOpen(false);
       form.resetFields();
       fetchKeys();
     } else {
-      message.error("Failed to add key");
+      message.error("添加失败");
     }
   };
 
   const handleDelete = async (id: number) => {
     Modal.confirm({
-      title: "Delete this API key?",
+      title: "确认删除此 API 密钥？",
       okButtonProps: { danger: true },
+      okText: "删除",
+      cancelText: "取消",
       onOk: async () => {
         const res = await fetch(`/api/keys/${id}`, { method: "DELETE" });
         if (res.ok) {
-          message.success("Deleted");
+          message.success("已删除");
           fetchKeys();
         } else {
-          message.error("Failed to delete");
+          message.error("删除失败");
         }
       },
     });
@@ -81,14 +83,14 @@ export default function KeysPage() {
     if (res.ok) {
       fetchKeys();
     } else {
-      message.error("Failed to update");
+      message.error("更新失败");
     }
   };
 
   const columns = [
-    { title: "Name", dataIndex: "name", key: "name" },
+    { title: "名称", dataIndex: "name", key: "name" },
     {
-      title: "Provider",
+      title: "服务商",
       dataIndex: "provider",
       key: "provider",
       render: (v: string) => <Tag color={v === "zai" ? "blue" : "green"}>{v.toUpperCase()}</Tag>,
@@ -97,10 +99,10 @@ export default function KeysPage() {
       title: "API Key",
       dataIndex: "api_key",
       key: "api_key",
-      render: (v: string) => <span style={{ fontFamily: "monospace" }}>{v.slice(0, 8)}****{v.slice(-4)}</span>,
+      render: (v: string) => <span style={{ fontFamily: "monospace" }}>{v}</span>,
     },
     {
-      title: "Active",
+      title: "启用",
       dataIndex: "is_active",
       key: "is_active",
       render: (v: number, record: ApiKey) => (
@@ -108,10 +110,12 @@ export default function KeysPage() {
       ),
     },
     {
-      title: "Actions",
+      title: "操作",
       key: "actions",
       render: (_: unknown, record: ApiKey) => (
-        <Button danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.id)} size="small" />
+        <Button danger icon={<DeleteOutlined />} onClick={() => handleDelete(record.id)} size="small">
+          删除
+        </Button>
       ),
     },
   ];
@@ -119,9 +123,9 @@ export default function KeysPage() {
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-        <Title level={3} style={{ margin: 0, fontWeight: 600 }}>API Keys</Title>
+        <Title level={3} style={{ margin: 0, fontWeight: 600 }}>API 密钥</Title>
         <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)} style={{ borderRadius: 8 }}>
-          Add Key
+          添加密钥
         </Button>
       </div>
 
@@ -129,19 +133,19 @@ export default function KeysPage() {
         <Table dataSource={keys} columns={columns} rowKey="id" loading={loading} />
       </Card>
 
-      <Modal title="Add API Key" open={modalOpen} onCancel={() => setModalOpen(false)} onOk={() => form.submit()}>
+      <Modal title="添加 API 密钥" open={modalOpen} onCancel={() => setModalOpen(false)} onOk={() => form.submit()} okText="添加" cancelText="取消">
         <Form form={form} layout="vertical" onFinish={handleAdd}>
-          <Form.Item name="name" label={<span style={{ fontWeight: 500 }}>Name</span>} rules={[{ required: true }]}>
-            <Input placeholder="e.g. My Z.AI Key" />
+          <Form.Item name="name" label={<span style={{ fontWeight: 500 }}>名称</span>} rules={[{ required: true, message: "请输入名称" }]}>
+            <Input placeholder="例如：我的智谱 Key" />
           </Form.Item>
-          <Form.Item name="provider" label={<span style={{ fontWeight: 500 }}>Provider</span>} rules={[{ required: true }]}>
-            <Select placeholder="Select provider">
+          <Form.Item name="provider" label={<span style={{ fontWeight: 500 }}>服务商</span>} rules={[{ required: true, message: "请选择服务商" }]}>
+            <Select placeholder="选择服务商">
               <Select.Option value="zai">Z.AI (智谱)</Select.Option>
-              <Select.Option value="xiaomi">Xiaomi</Select.Option>
+              <Select.Option value="xiaomi">小米</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="api_key" label={<span style={{ fontWeight: 500 }}>API Key</span>} rules={[{ required: true }]}>
-            <Input.Password placeholder="Enter API key" />
+          <Form.Item name="api_key" label={<span style={{ fontWeight: 500 }}>API Key</span>} rules={[{ required: true, message: "请输入 API Key" }]}>
+            <Input.Password placeholder="输入 API Key" />
           </Form.Item>
         </Form>
       </Modal>

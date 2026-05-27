@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button, Card, Col, Form, Input, Radio, Row, Select, Typography, message, Spin, Empty } from "antd";
+import { Button, Card, Col, Form, Input, Radio, Row, Select, Typography, message, Spin } from "antd";
 import { DownloadOutlined, PictureOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
@@ -9,7 +9,7 @@ const { TextArea } = Input;
 
 const PROVIDERS = [
   { value: "zai", label: "Z.AI (智谱)" },
-  { value: "xiaomi", label: "Xiaomi" },
+  { value: "xiaomi", label: "小米" },
 ];
 
 export default function GeneratePage() {
@@ -59,14 +59,14 @@ export default function GeneratePage() {
       const data = await res.json();
 
       if (!res.ok) {
-        message.error(data.error || "Generation failed");
+        message.error(data.error || "生成失败");
         return;
       }
 
       setImageUrl(`data:image/png;base64,${data.image}`);
-      message.success(`Generated in ${data.duration_ms}ms via ${data.provider}`);
+      message.success(`生成完成，耗时 ${data.duration_ms}ms，使用 ${data.provider}`);
     } catch {
-      message.error("Network error");
+      message.error("网络错误");
     } finally {
       setLoading(false);
     }
@@ -82,26 +82,18 @@ export default function GeneratePage() {
 
   return (
     <div>
-      <Title level={3} style={{ marginBottom: 24, fontWeight: 600 }}>Generate Image</Title>
+      <Title level={3} style={{ marginBottom: 24, fontWeight: 600 }}>生成图片</Title>
       <Row gutter={24}>
         <Col xs={24} lg={10}>
-          <Card
-            bordered={false}
-            style={{ borderRadius: 12 }}
-            styles={{ body: { padding: "24px 28px" } }}
-          >
+          <Card bordered={false} style={{ borderRadius: 12 }} styles={{ body: { padding: "24px 28px" } }}>
             <Form form={form} layout="vertical" onFinish={handleGenerate} initialValues={{ ar: "1:1", quality: "2k" }}>
-              <Form.Item name="prompt" label={<span style={{ fontWeight: 500 }}>Prompt</span>} rules={[{ required: true, message: "Please enter a prompt" }]}>
-                <TextArea
-                  rows={4}
-                  placeholder="Describe the image you want to generate..."
-                  style={{ borderRadius: 8 }}
-                />
+              <Form.Item name="prompt" label={<span style={{ fontWeight: 500 }}>提示词</span>} rules={[{ required: true, message: "请输入提示词" }]}>
+                <TextArea rows={4} placeholder="描述你想生成的图片..." style={{ borderRadius: 8 }} />
               </Form.Item>
               <Row gutter={16}>
                 <Col span={12}>
-                  <Form.Item name="provider" label={<span style={{ fontWeight: 500 }}>Provider</span>}>
-                    <Select onChange={handleProviderChange} style={{ borderRadius: 8 }}>
+                  <Form.Item name="provider" label={<span style={{ fontWeight: 500 }}>服务商</span>}>
+                    <Select onChange={handleProviderChange}>
                       {PROVIDERS.map((p) => (
                         <Select.Option key={p.value} value={p.value}>{p.label}</Select.Option>
                       ))}
@@ -109,14 +101,14 @@ export default function GeneratePage() {
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item name="model" label={<span style={{ fontWeight: 500 }}>Model</span>}>
-                    <Input placeholder="Default model" />
+                  <Form.Item name="model" label={<span style={{ fontWeight: 500 }}>模型</span>}>
+                    <Input placeholder="默认模型" />
                   </Form.Item>
                 </Col>
               </Row>
               <Row gutter={16}>
                 <Col span={12}>
-                  <Form.Item name="ar" label={<span style={{ fontWeight: 500 }}>Aspect Ratio</span>}>
+                  <Form.Item name="ar" label={<span style={{ fontWeight: 500 }}>宽高比</span>}>
                     <Radio.Group buttonStyle="solid">
                       <Radio.Button value="1:1">1:1</Radio.Button>
                       <Radio.Button value="16:9">16:9</Radio.Button>
@@ -126,24 +118,17 @@ export default function GeneratePage() {
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item name="quality" label={<span style={{ fontWeight: 500 }}>Quality</span>}>
+                  <Form.Item name="quality" label={<span style={{ fontWeight: 500 }}>质量</span>}>
                     <Radio.Group buttonStyle="solid">
-                      <Radio.Button value="normal">Normal</Radio.Button>
+                      <Radio.Button value="normal">普通</Radio.Button>
                       <Radio.Button value="2k">2K</Radio.Button>
                     </Radio.Group>
                   </Form.Item>
                 </Col>
               </Row>
               <Form.Item style={{ marginBottom: 0 }}>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  loading={loading}
-                  block
-                  size="large"
-                  style={{ height: 44, borderRadius: 8, fontWeight: 500 }}
-                >
-                  Generate
+                <Button type="primary" htmlType="submit" loading={loading} block size="large" style={{ height: 44, borderRadius: 8, fontWeight: 500 }}>
+                  生成
                 </Button>
               </Form.Item>
             </Form>
@@ -154,13 +139,11 @@ export default function GeneratePage() {
             bordered={false}
             style={{ borderRadius: 12 }}
             styles={{ body: { padding: imageUrl ? 0 : 24 } }}
-            title={
-              <span style={{ fontWeight: 500 }}>Result</span>
-            }
+            title={<span style={{ fontWeight: 500 }}>结果</span>}
             extra={
               imageUrl && (
                 <Button icon={<DownloadOutlined />} onClick={handleDownload} style={{ borderRadius: 8 }}>
-                  Download
+                  下载
                 </Button>
               )
             }
@@ -168,18 +151,14 @@ export default function GeneratePage() {
             {loading ? (
               <div style={{ textAlign: "center", padding: "80px 0" }}>
                 <Spin size="large" />
-                <div style={{ marginTop: 16, color: "#64748b" }}>Generating...</div>
+                <div style={{ marginTop: 16, color: "#64748b" }}>生成中...</div>
               </div>
             ) : imageUrl ? (
-              <img
-                src={imageUrl}
-                alt="Generated"
-                style={{ width: "100%", display: "block", borderRadius: "0 0 12px 12px" }}
-              />
+              <img src={imageUrl} alt="Generated" style={{ width: "100%", display: "block", borderRadius: "0 0 12px 12px" }} />
             ) : (
               <div style={{ textAlign: "center", padding: "80px 0", color: "#cbd5e1" }}>
                 <PictureOutlined style={{ fontSize: 64, marginBottom: 16 }} />
-                <div>Enter a prompt and click Generate</div>
+                <div>输入提示词后点击生成</div>
               </div>
             )}
           </Card>
