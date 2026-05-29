@@ -51,6 +51,8 @@ const INFOGRAPHIC_STYLES = [
   { value: "pop-laboratory", label: "流行实验室", preview: "/images/infographic-styles/cyberpunk-neon.webp", description: "蓝图网格、坐标" },
   { value: "morandi-journal", label: "莫兰迪手账", preview: "/images/infographic-styles/craft-handmade.webp", description: "手绘涂鸦、暖莫兰迪色" },
   { value: "retro-pop-grid", label: "复古流行网格", preview: "/images/infographic-styles/bold-graphic.webp", description: "70年代复古、瑞士网格" },
+  { value: "hand-drawn-edu", label: "手绘教育", preview: "/images/infographic-styles/kawaii.webp", description: "马卡龙色、手绘涂鸦、简笔画" },
+  { value: "retro-popup-pop", label: "复古弹出流行", preview: "/images/infographic-styles/bold-graphic.webp", description: "复古弹出拼贴、粗轮廓" },
 ];
 
 interface ImageResult {
