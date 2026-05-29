@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Button, Card, Col, Form, Input, Row, Select, Typography, message } from "antd";
-import { SaveOutlined } from "@ant-design/icons";
+import { SaveOutlined, LinkOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 
@@ -10,6 +10,7 @@ interface ProviderConfig {
   name: string;
   label: string;
   color: string;
+  developerUrl: string;
   fields: { key: string; label: string; placeholder: string; type?: "password" | "text" }[];
 }
 
@@ -18,6 +19,7 @@ const PROVIDERS: ProviderConfig[] = [
     name: "zai",
     label: "Z.AI (智谱)",
     color: "#4f46e5",
+    developerUrl: "https://open.bigmodel.cn/usercenter/apikeys",
     fields: [
       { key: "zai_api_key", label: "API Key", placeholder: "输入智谱 API Key", type: "password" },
       { key: "zai_base_url", label: "Base URL", placeholder: "https://open.bigmodel.cn/api/paas/v4" },
@@ -28,6 +30,7 @@ const PROVIDERS: ProviderConfig[] = [
     name: "openai",
     label: "OpenAI",
     color: "#10a37f",
+    developerUrl: "https://platform.openai.com/api-keys",
     fields: [
       { key: "openai_api_key", label: "API Key", placeholder: "输入 OpenAI API Key", type: "password" },
       { key: "openai_base_url", label: "Base URL", placeholder: "https://api.openai.com/v1" },
@@ -38,6 +41,7 @@ const PROVIDERS: ProviderConfig[] = [
     name: "google",
     label: "Google (Gemini)",
     color: "#4285f4",
+    developerUrl: "https://aistudio.google.com/apikey",
     fields: [
       { key: "google_api_key", label: "API Key", placeholder: "输入 Google API Key", type: "password" },
       { key: "google_base_url", label: "Base URL", placeholder: "https://generativelanguage.googleapis.com/v1beta" },
@@ -48,6 +52,7 @@ const PROVIDERS: ProviderConfig[] = [
     name: "openrouter",
     label: "OpenRouter",
     color: "#ff6b35",
+    developerUrl: "https://openrouter.ai/keys",
     fields: [
       { key: "openrouter_api_key", label: "API Key", placeholder: "输入 OpenRouter API Key", type: "password" },
       { key: "openrouter_base_url", label: "Base URL", placeholder: "https://openrouter.ai/api/v1" },
@@ -58,6 +63,7 @@ const PROVIDERS: ProviderConfig[] = [
     name: "dashscope",
     label: "DashScope (通义万相)",
     color: "#ff6a00",
+    developerUrl: "https://dashscope.console.aliyun.com/apiKey",
     fields: [
       { key: "dashscope_api_key", label: "API Key", placeholder: "输入 DashScope API Key", type: "password" },
       { key: "dashscope_base_url", label: "Base URL", placeholder: "https://dashscope.aliyuncs.com/api/v1" },
@@ -68,6 +74,7 @@ const PROVIDERS: ProviderConfig[] = [
     name: "minimax",
     label: "MiniMax",
     color: "#6366f1",
+    developerUrl: "https://platform.minimaxi.com/user-center/api-keys",
     fields: [
       { key: "minimax_api_key", label: "API Key", placeholder: "输入 MiniMax API Key", type: "password" },
       { key: "minimax_base_url", label: "Base URL", placeholder: "https://api.minimax.chat" },
@@ -78,6 +85,7 @@ const PROVIDERS: ProviderConfig[] = [
     name: "replicate",
     label: "Replicate",
     color: "#000000",
+    developerUrl: "https://replicate.com/account/api-tokens",
     fields: [
       { key: "replicate_api_key", label: "API Token", placeholder: "输入 Replicate API Token", type: "password" },
       { key: "replicate_base_url", label: "Base URL", placeholder: "https://api.replicate.com/v1" },
@@ -88,6 +96,7 @@ const PROVIDERS: ProviderConfig[] = [
     name: "jimeng",
     label: "即梦 (Jimeng)",
     color: "#3b82f6",
+    developerUrl: "https://console.volcengine.com/iam/keymanage/",
     fields: [
       { key: "jimeng_api_key", label: "API Key (AccessKey:SecretKey)", placeholder: "输入即梦 AccessKey:SecretKey", type: "password" },
       { key: "jimeng_base_url", label: "Base URL", placeholder: "https://visual.volcengineapi.com" },
@@ -98,6 +107,7 @@ const PROVIDERS: ProviderConfig[] = [
     name: "seedream",
     label: "豆包 Seedream",
     color: "#00d4aa",
+    developerUrl: "https://console.volcengine.com/ark/region:ark+cn-beijing/apiKey",
     fields: [
       { key: "seedream_api_key", label: "API Key", placeholder: "输入豆包 ARK API Key", type: "password" },
       { key: "seedream_base_url", label: "Base URL", placeholder: "https://ark.cn-beijing.volces.com/api/v3" },
@@ -108,6 +118,7 @@ const PROVIDERS: ProviderConfig[] = [
     name: "azure",
     label: "Azure OpenAI",
     color: "#0078d4",
+    developerUrl: "https://portal.azure.com/#view/Microsoft_Azure_AI/OpenAI/azureopenai",
     fields: [
       { key: "azure_api_key", label: "API Key", placeholder: "输入 Azure OpenAI API Key", type: "password" },
       { key: "azure_base_url", label: "Endpoint", placeholder: "https://your-resource.openai.azure.com" },
@@ -263,6 +274,14 @@ export default function SettingsPage() {
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{ width: 8, height: 32, borderRadius: 4, background: provider.color }} />
               <span style={{ fontWeight: 500 }}>{provider.label}</span>
+              <a
+                href={provider.developerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ fontSize: 12, color: "#64748b", display: "flex", alignItems: "center", gap: 4 }}
+              >
+                <LinkOutlined /> 开发者中心
+              </a>
             </div>
           }
           extra={
