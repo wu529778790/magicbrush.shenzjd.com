@@ -139,7 +139,7 @@ ${paletteInfo?.value ? `配色：${paletteInfo.label}` : "配色：默认"}
                         form.setFieldValue("style", s.value);
                       }}
                     >
-                      <img src={s.preview} alt={s.label} style={{ width: "100%", height: 120, objectFit: "cover" }} />
+                      <img src={s.preview} alt={s.label} style={{ width: "100%", display: "block" }} />
                       <div style={{ padding: "8px 0", textAlign: "center", fontSize: 13, fontWeight: 500 }}>
                         {s.label}
                       </div>
@@ -173,7 +173,7 @@ ${paletteInfo?.value ? `配色：${paletteInfo.label}` : "配色：默认"}
                         form.setFieldValue("layout", l.value);
                       }}
                     >
-                      <img src={l.preview} alt={l.label} style={{ width: "100%", height: 120, objectFit: "cover" }} />
+                      <img src={l.preview} alt={l.label} style={{ width: "100%", display: "block" }} />
                       <div style={{ padding: "8px 0", textAlign: "center", fontSize: 13, fontWeight: 500 }}>
                         {l.label}
                       </div>
