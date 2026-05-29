@@ -8,6 +8,7 @@ import type {
   GenerateImageOptions,
   ImageProvider,
   OpenAIImageApiResponse,
+  Provider,
   Quality,
 } from "./types";
 import { ProviderError } from "./types";
@@ -136,7 +137,7 @@ export interface OpenAICompatibleConfig {
 }
 
 export class OpenAICompatibleProvider implements ImageProvider {
-  readonly name: string;
+  readonly name: Provider;
   readonly defaultModel: string;
 
   private readonly baseUrl: string;
@@ -144,7 +145,7 @@ export class OpenAICompatibleProvider implements ImageProvider {
   private readonly useChatEndpoint: boolean;
   private readonly extraBody: Record<string, unknown>;
 
-  constructor(name: string, config: OpenAICompatibleConfig) {
+  constructor(name: Provider, config: OpenAICompatibleConfig) {
     this.name = name;
     this.baseUrl = config.baseUrl.replace(/\/+$/g, "");
     this.defaultModel = config.defaultModel;
