@@ -1,31 +1,14 @@
 "use client";
 
 import { AntdRegistry } from "@ant-design/nextjs-registry";
-import { ConfigProvider, Layout, Menu, Typography } from "antd";
-import {
-  HomeOutlined,
-  PictureOutlined,
-  HistoryOutlined,
-  SettingOutlined,
-  SmileOutlined,
-} from "@ant-design/icons";
+import { ConfigProvider, Layout, Button, Typography } from "antd";
+import { SettingOutlined, PictureOutlined } from "@ant-design/icons";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
-const { Sider, Content } = Layout;
+const { Header, Content } = Layout;
 const { Text } = Typography;
 
-const menuItems = [
-  { key: "/", icon: <HomeOutlined />, label: <Link href="/">仪表盘</Link> },
-  { key: "/generate", icon: <PictureOutlined />, label: <Link href="/generate">生成图片</Link> },
-  { key: "/xhs", icon: <SmileOutlined />, label: <Link href="/xhs">小红书图片</Link> },
-  { key: "/records", icon: <HistoryOutlined />, label: <Link href="/records">生成记录</Link> },
-  { key: "/settings", icon: <SettingOutlined />, label: <Link href="/settings">设置</Link> },
-];
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-
   return (
     <html lang="zh-CN">
       <body style={{ margin: 0 }}>
@@ -36,41 +19,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 colorPrimary: "#4f46e5",
                 borderRadius: 10,
                 colorBgContainer: "#ffffff",
-                boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
-              },
-              components: {
-                Layout: {
-                  siderBg: "#1e1b4b",
-                  triggerBg: "#312e81",
-                },
-                Menu: {
-                  darkItemBg: "#1e1b4b",
-                  darkSubMenuItemBg: "#1e1b4b",
-                  darkItemSelectedBg: "#4f46e5",
-                  darkItemHoverBg: "#312e81",
-                },
               },
             }}
           >
-            <Layout style={{ minHeight: "100vh" }}>
-              <Sider
-                breakpoint="lg"
-                collapsedWidth="0"
-                width={220}
+            <Layout style={{ minHeight: "100vh", background: "#f8fafc" }}>
+              <Header
                 style={{
-                  borderRight: "1px solid #e5e7eb",
+                  background: "#fff",
+                  borderBottom: "1px solid #e5e7eb",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "0 32px",
+                  height: 64,
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 100,
                 }}
               >
-                <div
-                  style={{
-                    height: 64,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 10,
-                    borderBottom: "1px solid rgba(255,255,255,0.08)",
-                  }}
-                >
+                <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
                   <div
                     style={{
                       width: 36,
@@ -84,26 +51,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   >
                     <PictureOutlined style={{ color: "#fff", fontSize: 18 }} />
                   </div>
-                  <Text strong style={{ color: "#fff", fontSize: 18, letterSpacing: -0.5 }}>
+                  <Text strong style={{ fontSize: 20, letterSpacing: -0.5, color: "#1e1b4b" }}>
                     BaoyuImages
                   </Text>
-                </div>
-                <Menu
-                  theme="dark"
-                  mode="inline"
-                  selectedKeys={[pathname]}
-                  items={menuItems}
-                  style={{ borderRight: "none", padding: "8px 0" }}
-                />
-              </Sider>
-              <Content
-                style={{
-                  margin: 0,
-                  padding: 32,
-                  background: "#f8fafc",
-                  overflow: "auto",
-                }}
-              >
+                </Link>
+                <Link href="/settings">
+                  <Button icon={<SettingOutlined />} type="text" style={{ color: "#64748b" }}>
+                    设置
+                  </Button>
+                </Link>
+              </Header>
+              <Content style={{ padding: 0 }}>
                 {children}
               </Content>
             </Layout>
