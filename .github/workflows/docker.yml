@@ -81,7 +81,7 @@ jobs:
               --restart unless-stopped \
               -p 6668:3000 \
               -v "$DATA_DIR":/app/data \
-              -e DATABASE_URL=file:/app/data/baoyuimages.db \
+              -e DATABASE_URL=file:/app/data/magicbrush.db \
               "$IMAGE"
             sudo docker image prune -f
             echo "=== Container Status ==="

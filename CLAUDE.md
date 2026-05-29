@@ -25,7 +25,7 @@ No test framework is configured.
 
 **Framework:** Next.js 16 (App Router), Ant Design 6, Tailwind CSS 4
 
-**Database:** SQLite via `better-sqlite3`. Singleton instance in `src/lib/db.ts` with WAL mode and foreign keys enabled. Stored at `DATABASE_URL` (format: `file:/path`) or defaults to `data/baoyuimages.db`. Three tables: `api_keys`, `generation_records`, `settings`. On startup, any records stuck in "pending" for over 10 minutes are auto-marked as "failed" with message "Process interrupted".
+**Database:** SQLite via `better-sqlite3`. Singleton instance in `src/lib/db.ts` with WAL mode and foreign keys enabled. Stored at `DATABASE_URL` (format: `file:/path`) or defaults to `data/magicbrush.db`. Three tables: `api_keys`, `generation_records`, `settings`. On startup, any records stuck in "pending" for over 10 minutes are auto-marked as "failed" with message "Process interrupted".
 
 **Provider pattern:** Each image provider implements `ImageProvider` interface in `src/providers/types.ts`, returning `Promise<Buffer>` (PNG bytes). The factory in `src/providers/index.ts` exposes `createProvider(name, config?)` and a convenience `generateImage()` wrapper. Current implementations:
 
@@ -56,7 +56,7 @@ No test framework is configured.
 
 ## CI/CD
 
-GitHub Actions (`.github/workflows/docker.yml`): builds Docker image, pushes to GHCR on main/tag, auto-deploys to production server via SSH on main push. Production runs on port 6668 with container name `BaoyuImages`.
+GitHub Actions (`.github/workflows/docker.yml`): builds Docker image, pushes to GHCR on main/tag, auto-deploys to production server via SSH on main push. Production runs on port 6668 with container name `magicbrush`.
 
 ## Adding a New Provider
 

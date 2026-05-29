@@ -90,7 +90,7 @@ docker-compose up -d
 
 | 变量 | 说明 | 默认值 |
 |------|------|--------|
-| `DATABASE_URL` | SQLite 文件路径 | `data/baoyuimages.db` |
+| `DATABASE_URL` | SQLite 文件路径 | `data/magicbrush.db` |
 
 API 密钥通过界面设置，无需环境变量。
 
@@ -106,8 +106,8 @@ API 密钥通过界面设置，无需环境变量。
 docker run -d \
   -p 6668:3000 \
   -v $(pwd)/data:/app/data \
-  --name BaoyuImages \
-  ghcr.io/wu529778790/baoyuimages:main
+  --name magicbrush \
+  ghcr.io/wu529778790/magicbrush.shenzjd.com:main
 ```
 
 ## 致谢

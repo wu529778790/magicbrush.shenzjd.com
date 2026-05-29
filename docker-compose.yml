@@ -1,10 +1,10 @@
 services:
-  baoyuimages:
+  magicbrush:
     build: .
     ports:
       - "${PORT:-3000}:3000"
     volumes:
       - ./data:/app/data
     environment:
-      - DATABASE_URL=file:/app/data/baoyuimages.db
+      - DATABASE_URL=file:/app/data/magicbrush.db
     restart: unless-stopped
