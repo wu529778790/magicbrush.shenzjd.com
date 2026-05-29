@@ -117,6 +117,14 @@ ${paletteInfo?.value ? `配色：${paletteInfo.label}` : "配色：默认"}
               <Input.TextArea rows={4} placeholder="输入你想生成卡片的内容..." style={{ borderRadius: 8, fontSize: 15 }} />
             </Form.Item>
 
+            {/* 隐藏字段确保有值 */}
+            <Form.Item name="style" hidden rules={[{ required: true, message: "请选择视觉风格" }]}>
+              <Input />
+            </Form.Item>
+            <Form.Item name="layout" hidden rules={[{ required: true, message: "请选择信息布局" }]}>
+              <Input />
+            </Form.Item>
+
             {/* 视觉风格 */}
             <Form.Item label={<span style={{ fontWeight: 600, fontSize: 16 }}>视觉风格</span>}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(9, 1fr)", gap: 12 }}>
@@ -147,10 +155,6 @@ ${paletteInfo?.value ? `配色：${paletteInfo.label}` : "配色：默认"}
               </div>
             </Form.Item>
 
-            <Form.Item name="style" hidden>
-              <Input />
-            </Form.Item>
-
             {/* 信息布局 */}
             <Form.Item label={<span style={{ fontWeight: 600, fontSize: 16 }}>信息布局</span>}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 12 }}>
@@ -179,10 +183,6 @@ ${paletteInfo?.value ? `配色：${paletteInfo.label}` : "配色：默认"}
                   </Tooltip>
                 ))}
               </div>
-            </Form.Item>
-
-            <Form.Item name="layout" hidden>
-              <Input />
             </Form.Item>
 
             {/* 配色选择 */}

@@ -144,6 +144,14 @@ ${values.lang ? `语言：${values.lang}` : "语言：中文"}
               <Input.TextArea rows={4} placeholder="输入你想生成信息图的内容..." style={{ borderRadius: 8, fontSize: 15 }} />
             </Form.Item>
 
+            {/* 隐藏字段确保有值 */}
+            <Form.Item name="layout" hidden rules={[{ required: true, message: "请选择信息布局" }]}>
+              <Input />
+            </Form.Item>
+            <Form.Item name="style" hidden rules={[{ required: true, message: "请选择视觉风格" }]}>
+              <Input />
+            </Form.Item>
+
             {/* 布局选择 */}
             <Form.Item label={<span style={{ fontWeight: 600, fontSize: 16 }}>信息布局（21种）</span>}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 12 }}>
@@ -174,10 +182,6 @@ ${values.lang ? `语言：${values.lang}` : "语言：中文"}
               </div>
             </Form.Item>
 
-            <Form.Item name="layout" hidden>
-              <Input />
-            </Form.Item>
-
             {/* 风格选择 */}
             <Form.Item label={<span style={{ fontWeight: 600, fontSize: 16 }}>视觉风格（22种）</span>}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 12 }}>
@@ -206,10 +210,6 @@ ${values.lang ? `语言：${values.lang}` : "语言：中文"}
                   </Tooltip>
                 ))}
               </div>
-            </Form.Item>
-
-            <Form.Item name="style" hidden>
-              <Input />
             </Form.Item>
 
             {/* 参数设置 */}
