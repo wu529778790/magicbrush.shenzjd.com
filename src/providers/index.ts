@@ -14,11 +14,9 @@
 
 import type { GenerateImageOptions, ImageProvider, Provider } from "./types";
 import { ZaiProvider } from "./zai";
-import { XiaomiProvider } from "./xiaomi";
 
 export type { GenerateImageOptions, ImageProvider, Provider, ProviderError } from "./types";
 export { ZaiProvider } from "./zai";
-export { XiaomiProvider } from "./xiaomi";
 
 // ---------------------------------------------------------------------------
 // Provider factory
@@ -34,7 +32,6 @@ export interface ProviderConfig {
 /** Single source of truth for all provider constructors. Each factory creates a provider from config. */
 const PROVIDER_REGISTRY: Record<Provider, (config?: ProviderConfig) => ImageProvider> = {
   zai: (config) => new ZaiProvider(config?.baseUrl),
-  xiaomi: (config) => new XiaomiProvider({ baseUrl: config?.baseUrl, defaultModel: config?.defaultModel }),
 };
 
 /**

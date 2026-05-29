@@ -96,7 +96,6 @@ export default function RecordsPage() {
             onChange={setProviderFilter}
             options={[
               { value: "zai", label: "Z.AI" },
-              { value: "xiaomi", label: "小米" },
             ]}
           />
           <Select

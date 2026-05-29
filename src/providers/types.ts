@@ -1,5 +1,5 @@
 /** Supported image generation providers. */
-export type Provider = "zai" | "xiaomi";
+export type Provider = "zai";
 
 /** Quality preset for image generation. */
 export type Quality = "normal" | "2k";

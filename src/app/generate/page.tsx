@@ -9,7 +9,6 @@ const { TextArea } = Input;
 
 const PROVIDERS = [
   { value: "zai", label: "Z.AI (智谱)" },
-  { value: "xiaomi", label: "小米" },
 ];
 
 const ASPECT_RATIOS = [

@@ -8,9 +8,6 @@ const SETTINGS_KEYS = [
   "zai_api_key",
   "zai_base_url",
   "zai_model",
-  "xiaomi_api_key",
-  "xiaomi_base_url",
-  "xiaomi_model",
 ];
 
 export async function GET() {

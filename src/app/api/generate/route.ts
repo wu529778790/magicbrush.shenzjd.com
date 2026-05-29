@@ -5,10 +5,9 @@ import type { Provider } from "@/providers";
 
 const DEFAULT_MODELS: Record<Provider, string> = {
   zai: "cogview-3",
-  xiaomi: "xiaomi-image",
 };
 
-const VALID_PROVIDERS: Provider[] = ["zai", "xiaomi"];
+const VALID_PROVIDERS: Provider[] = ["zai"];
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -40,7 +39,7 @@ export async function POST(request: NextRequest) {
     if (apiKey) {
       providerName = defaultProvider;
     } else {
-      for (const name of ["zai", "xiaomi"] as Provider[]) {
+      for (const name of ["zai"] as Provider[]) {
         const keyRecord = getActiveKeyByProvider(name);
         if (keyRecord) {
           apiKey = keyRecord.api_key;
