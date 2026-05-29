@@ -1,6 +1,8 @@
-# BaoyuImages
+# 妙笔 (MagicBrush)
 
 AI 图片生成服务，支持 10+ 服务商、多种风格和布局。参考 [baoyu-skills](https://github.com/jimliu/baoyu-skills) 实现。
+
+> 妙笔生花，一键生成精美图片
 
 ## 功能特性
 

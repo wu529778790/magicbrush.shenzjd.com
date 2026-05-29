@@ -177,10 +177,10 @@ ${paletteInfo?.value ? `配色：${paletteInfo.label}` : "配色：默认"}
       <div style={{ textAlign: "center", padding: "60px 20px 40px" }}>
         <Title level={1} style={{ marginBottom: 16, fontWeight: 700 }}>
           <ThunderboltOutlined style={{ color: "#4f46e5", marginRight: 12 }} />
-          AI 图片生成
+          妙笔
         </Title>
         <Paragraph style={{ fontSize: 18, color: "#64748b", maxWidth: 600, margin: "0 auto" }}>
-          输入文字，一键生成精美图片。支持多种风格、布局和配色方案。
+          妙笔生花，一键生成精美图片。支持多种风格、布局和配色方案。
         </Paragraph>
       </div>
 

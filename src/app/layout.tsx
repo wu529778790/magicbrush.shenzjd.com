@@ -52,7 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     <PictureOutlined style={{ color: "#fff", fontSize: 18 }} />
                   </div>
                   <Text strong style={{ fontSize: 20, letterSpacing: -0.5, color: "#1e1b4b" }}>
-                    BaoyuImages
+                    妙笔
                   </Text>
                 </Link>
                 <Link href="/settings">
