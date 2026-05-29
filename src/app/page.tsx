@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button, Card, Form, Input, Row, Col, Select, Modal, message, Tooltip } from "antd";
 import { DownloadOutlined, ThunderboltOutlined } from "@ant-design/icons";
 
-// 小红书风格选项（共9种，与baoyu-skills一致）
+// 小红书风格选项（9种，与baoyu-skills一致）
 const XHS_STYLES = [
   { value: "cute", label: "甜美可爱", preview: "/images/xhs-styles/cute.webp", description: "少女风、甜美 aesthetic（默认）" },
   { value: "fresh", label: "清新自然", preview: "/images/xhs-styles/fresh.webp", description: "干净清爽、自然风格" },
@@ -17,6 +17,7 @@ const XHS_STYLES = [
   { value: "chalkboard", label: "黑板粉笔", preview: "/images/xhs-styles/chalkboard.webp", description: "彩色粉笔、教育风格" },
 ];
 
+// 小红书布局选项（6种官方选项）
 const XHS_LAYOUTS = [
   { value: "sparse", label: "简约", preview: "/images/xhs-layouts/sparse.webp", description: "1-2个要点，最大冲击（封面、金句）" },
   { value: "balanced", label: "均衡", preview: "/images/xhs-layouts/balanced.webp", description: "3-4个要点，标准布局（常规内容）" },
@@ -32,6 +33,10 @@ const XHS_PALETTES = [
   { value: "warm", label: "暖色调", description: "大地色系、温馨" },
   { value: "neon", label: "霓虹", description: "高能量、未来感" },
 ];
+
+interface ImageResult {
+  url: string;
+}
 
 export default function HomePage() {
   const [loading, setLoading] = useState(false);
@@ -118,13 +123,13 @@ ${paletteInfo?.value ? `配色：${paletteInfo.label}` : "配色：默认"}
 
             {/* 视觉风格 */}
             <Form.Item label={<span style={{ fontWeight: 600, fontSize: 16 }}>视觉风格</span>}>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 16 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(9, 1fr)", gap: 12 }}>
                 {XHS_STYLES.map(s => (
                   <Tooltip key={s.value} title={s.description} placement="top">
                     <div
                       style={{
                         border: previewStyle === s.value ? "3px solid #4f46e5" : "2px solid #e5e7eb",
-                        borderRadius: 12,
+                        borderRadius: 8,
                         overflow: "hidden",
                         cursor: "pointer",
                         transition: "all 0.2s",
@@ -137,7 +142,7 @@ ${paletteInfo?.value ? `配色：${paletteInfo.label}` : "配色：默认"}
                       }}
                     >
                       <img src={s.preview} alt={s.label} style={{ width: "100%", display: "block" }} />
-                      <div style={{ padding: "8px 0", textAlign: "center", fontSize: 13, fontWeight: 500 }}>
+                      <div style={{ padding: "4px 0", textAlign: "center", fontSize: 11, fontWeight: 500 }}>
                         {s.label}
                       </div>
                     </div>
@@ -152,13 +157,13 @@ ${paletteInfo?.value ? `配色：${paletteInfo.label}` : "配色：默认"}
 
             {/* 信息布局 */}
             <Form.Item label={<span style={{ fontWeight: 600, fontSize: 16 }}>信息布局</span>}>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 12 }}>
                 {XHS_LAYOUTS.map(l => (
                   <Tooltip key={l.value} title={l.description} placement="top">
                     <div
                       style={{
                         border: previewLayout === l.value ? "3px solid #4f46e5" : "2px solid #e5e7eb",
-                        borderRadius: 12,
+                        borderRadius: 8,
                         overflow: "hidden",
                         cursor: "pointer",
                         transition: "all 0.2s",
@@ -171,7 +176,7 @@ ${paletteInfo?.value ? `配色：${paletteInfo.label}` : "配色：默认"}
                       }}
                     >
                       <img src={l.preview} alt={l.label} style={{ width: "100%", display: "block" }} />
-                      <div style={{ padding: "8px 0", textAlign: "center", fontSize: 13, fontWeight: 500 }}>
+                      <div style={{ padding: "4px 0", textAlign: "center", fontSize: 11, fontWeight: 500 }}>
                         {l.label}
                       </div>
                     </div>
@@ -184,10 +189,10 @@ ${paletteInfo?.value ? `配色：${paletteInfo.label}` : "配色：默认"}
               <Input />
             </Form.Item>
 
-            {/* 配色方案 */}
+            {/* 配色和生成按钮 */}
             <Row gutter={16}>
-              <Col span={8}>
-                <Form.Item name="palette" label={<span style={{ fontWeight: 600, fontSize: 16 }}>配色方案</span>}>
+              <Col span={6}>
+                <Form.Item name="palette" label={<span style={{ fontWeight: 600 }}>配色方案</span>}>
                   <Select placeholder="选择配色（可选）" allowClear size="large">
                     {XHS_PALETTES.map(p => (
                       <Select.Option key={p.value} value={p.value}>
@@ -200,8 +205,8 @@ ${paletteInfo?.value ? `配色：${paletteInfo.label}` : "配色：默认"}
                   </Select>
                 </Form.Item>
               </Col>
-              <Col span={16}>
-                <Form.Item label={<span style={{ fontWeight: 600, fontSize: 16 }}>&nbsp;</span>}>
+              <Col span={18}>
+                <Form.Item label={<span style={{ fontWeight: 600 }}>&nbsp;</span>}>
                   <Button type="primary" htmlType="submit" loading={loading} block size="large" icon={<ThunderboltOutlined />} style={{ height: 48, borderRadius: 10, fontWeight: 600 }}>
                     {loading ? "生成中..." : "生成图片"}
                   </Button>
@@ -221,7 +226,7 @@ ${paletteInfo?.value ? `配色：${paletteInfo.label}` : "配色：默认"}
             下载图片
           </Button>,
         ]}
-        width={700}
+        width={600}
         centered
       >
         {previewImage && (
