@@ -1,13 +1,13 @@
 /**
  * DashScope (阿里通义万相) image generation provider.
  *
- * Uses the DashScope API with /v1/services/aigc/text2image/image-synthesis endpoint.
+ * Uses the DashScope multimodal-generation API endpoint.
+ * Reference: https://github.com/jimliu/baoyu-skills/blob/main/skills/baoyu-image-gen/scripts/providers/dashscope.ts
  */
 
 import type {
   GenerateImageOptions,
   ImageProvider,
-  Quality,
 } from "./types";
 import { ProviderError } from "./types";
 
@@ -25,7 +25,7 @@ function parseAspectRatio(ar: string): { width: number; height: number } | null 
 }
 
 function parsePixelSize(value: string): { width: number; height: number } | null {
-  const match = value.match(/^(\d+)\s*[xX*]\s*(\d+)$/);
+  const match = value.trim().match(/^(\d+)\s*[xX*]\s*(\d+)$/);
   if (!match) return null;
   const width = parseInt(match[1]!, 10);
   const height = parseInt(match[2]!, 10);
@@ -35,35 +35,11 @@ function parsePixelSize(value: string): { width: number; height: number } | null
   return { width, height };
 }
 
-function roundToMultiple(value: number, multiple: number): number {
-  return Math.max(multiple, Math.round(value / multiple) * multiple);
+function roundToStep(value: number, step: number): number {
+  return Math.max(step, Math.round(value / step) * step);
 }
 
-function buildSizeFromAspectRatio(ar: string | null, quality: Quality): string {
-  const parsed = ar ? parseAspectRatio(ar) : null;
-  const ratio = parsed ? parsed.width / parsed.height : 1;
-
-  if (!parsed || (parsed.width === parsed.height)) {
-    const edge = quality === "2k" ? 1536 : 1024;
-    return `${edge}*${edge}`;
-  }
-
-  const targetLongEdge = quality === "2k" ? 1536 : 1024;
-  let width: number;
-  let height: number;
-
-  if (ratio > 1) {
-    width = targetLongEdge;
-    height = roundToMultiple(width / ratio, 32);
-  } else {
-    height = targetLongEdge;
-    width = roundToMultiple(height * ratio, 32);
-  }
-
-  return `${width}*${height}`;
-}
-
-function resolveSize(model: string, options: Pick<GenerateImageOptions, "size" | "aspectRatio" | "quality">): string {
+function resolveSize(options: Pick<GenerateImageOptions, "size" | "aspectRatio" | "quality">): string {
   if (options.size) {
     const parsed = parsePixelSize(options.size);
     if (!parsed) {
@@ -72,74 +48,71 @@ function resolveSize(model: string, options: Pick<GenerateImageOptions, "size" |
     return `${parsed.width}*${parsed.height}`;
   }
 
-  return buildSizeFromAspectRatio(options.aspectRatio ?? null, options.quality ?? "2k");
+  const quality = options.quality ?? "2k";
+  const targetPixels = quality === "2k" ? 1536 * 1536 : 1024 * 1024;
+
+  if (!options.aspectRatio) {
+    const side = roundToStep(Math.sqrt(targetPixels), 16);
+    return `${side}*${side}`;
+  }
+
+  const parsed = parseAspectRatio(options.aspectRatio);
+  if (!parsed) {
+    const side = roundToStep(Math.sqrt(targetPixels), 16);
+    return `${side}*${side}`;
+  }
+
+  const ratio = parsed.width / parsed.height;
+  const rawWidth = Math.sqrt(targetPixels * ratio);
+  const rawHeight = Math.sqrt(targetPixels / ratio);
+  const width = roundToStep(rawWidth, 16);
+  const height = roundToStep(rawHeight, 16);
+
+  return `${width}*${height}`;
 }
 
 // ---------------------------------------------------------------------------
 // Response handling
 // ---------------------------------------------------------------------------
 
-interface DashScopeSyncResponse {
+interface DashScopeResponse {
   output?: {
-    results?: Array<{
-      url?: string;
+    result_image?: string;
+    choices?: Array<{
+      message?: {
+        content?: Array<{ image?: string }>;
+      };
     }>;
   };
 }
 
-interface DashScopeAsyncResponse {
-  output?: {
-    task_id?: string;
-    task_status?: string;
-  };
-}
+async function extractImageFromResponse(result: DashScopeResponse): Promise<Buffer> {
+  let imageData: string | null = null;
 
-async function pollForResult(taskId: string, apiKey: string, maxAttempts = 60): Promise<string> {
-  const url = `https://dashscope.aliyuncs.com/api/v1/tasks/${taskId}`;
-
-  for (let i = 0; i < maxAttempts; i++) {
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to poll task: ${response.status}`);
-    }
-
-    const result = (await response.json()) as DashScopeAsyncResponse;
-
-    if (result.output?.task_status === "SUCCEEDED") {
-      // Need to get the actual URL from the results
-      const resultsUrl = `https://dashscope.aliyuncs.com/api/v1/tasks/${taskId}/results`;
-      const resultsResponse = await fetch(resultsUrl, {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-        },
-      });
-
-      if (!resultsResponse.ok) {
-        throw new Error(`Failed to get task results: ${resultsResponse.status}`);
+  if (result.output?.result_image) {
+    imageData = result.output.result_image;
+  } else if (result.output?.choices?.[0]?.message?.content) {
+    const content = result.output.choices[0].message.content;
+    for (const item of content) {
+      if (item.image) {
+        imageData = item.image;
+        break;
       }
-
-      const results = (await resultsResponse.json()) as DashScopeSyncResponse;
-      const imageUrl = results.output?.results?.[0]?.url;
-      if (!imageUrl) {
-        throw new Error("No image URL in task results");
-      }
-      return imageUrl;
     }
-
-    if (result.output?.task_status === "FAILED") {
-      throw new Error("DashScope task failed");
-    }
-
-    // Wait before polling again
-    await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
-  throw new Error("DashScope task timed out");
+  if (!imageData) {
+    throw new Error("No image in DashScope response");
+  }
+
+  if (imageData.startsWith("http://") || imageData.startsWith("https://")) {
+    const imgRes = await fetch(imageData);
+    if (!imgRes.ok) throw new Error("Failed to download image");
+    const arrayBuffer = await imgRes.arrayBuffer();
+    return Buffer.from(arrayBuffer);
+  }
+
+  return Buffer.from(imageData, "base64");
 }
 
 // ---------------------------------------------------------------------------
@@ -153,15 +126,10 @@ export class DashScopeProvider implements ImageProvider {
   private readonly baseUrl: string;
 
   constructor(baseUrl?: string) {
-    // DashScope API endpoint: https://dashscope.aliyuncs.com/api/v1
-    // The full endpoint for image generation is: /services/aigc/text2image/image-synthesis
-    this.baseUrl = (baseUrl ?? "https://dashscope.aliyuncs.com/api/v1")
+    // DashScope base URL: https://dashscope.aliyuncs.com
+    // The API endpoint will be: /api/v1/services/aigc/multimodal-generation/generation
+    this.baseUrl = (baseUrl ?? "https://dashscope.aliyuncs.com")
       .replace(/\/+$/g, "");
-  }
-
-  private getImageEndpoint(): string {
-    // Always use the correct endpoint for DashScope image generation
-    return "https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis";
   }
 
   async generateImage(
@@ -175,19 +143,27 @@ export class DashScopeProvider implements ImageProvider {
     }
 
     const resolvedModel = model || this.defaultModel;
-    const size = resolveSize(resolvedModel, options);
+    const size = resolveSize(options);
 
-    // Use the correct endpoint
-    const url = this.getImageEndpoint();
+    // Use the correct endpoint for DashScope multimodal generation
+    const url = `${this.baseUrl}/api/v1/services/aigc/multimodal-generation/generation`;
 
     const body = {
       model: resolvedModel,
       input: {
-        prompt,
+        messages: [
+          {
+            role: "user",
+            content: [
+              { text: prompt },
+            ],
+          },
+        ],
       },
       parameters: {
         size,
         n: 1,
+        watermark: false,
       },
     };
 
@@ -196,7 +172,6 @@ export class DashScopeProvider implements ImageProvider {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
-        "X-DashScope-Async": "enable",
       },
       body: JSON.stringify(body),
     });
@@ -206,21 +181,8 @@ export class DashScopeProvider implements ImageProvider {
       throw new ProviderError("dashscope", response.status, `DashScope API error (${response.status}): ${errText}`);
     }
 
-    const result = (await response.json()) as DashScopeAsyncResponse;
-    const taskId = result.output?.task_id;
-
-    if (!taskId) {
-      throw new Error("No task ID in DashScope response");
-    }
-
-    // Poll for results
-    const imageUrl = await pollForResult(taskId, apiKey);
-    const imageResponse = await fetch(imageUrl);
-    if (!imageResponse.ok) {
-      throw new Error(`Failed to download image: ${imageResponse.status}`);
-    }
-    const arrayBuffer = await imageResponse.arrayBuffer();
-    return Buffer.from(arrayBuffer);
+    const result = (await response.json()) as DashScopeResponse;
+    return extractImageFromResponse(result);
   }
 }
 

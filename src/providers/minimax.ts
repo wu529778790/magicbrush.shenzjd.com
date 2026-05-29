@@ -1,7 +1,8 @@
 /**
  * MiniMax image generation provider.
  *
- * Uses the MiniMax API with /v1/image/generation endpoint.
+ * Uses the MiniMax API with /v1/image_generation endpoint.
+ * Reference: https://github.com/jimliu/baoyu-skills/blob/main/skills/baoyu-image-gen/scripts/providers/minimax.ts
  */
 
 import type {
@@ -15,7 +16,7 @@ import { ProviderError } from "./types";
 // ---------------------------------------------------------------------------
 
 function parsePixelSize(value: string): { width: number; height: number } | null {
-  const match = value.match(/^(\d+)\s*[xX]\s*(\d+)$/);
+  const match = value.trim().match(/^(\d+)\s*[xX*]\s*(\d+)$/);
   if (!match) return null;
   const width = parseInt(match[1]!, 10);
   const height = parseInt(match[2]!, 10);
@@ -52,7 +53,8 @@ function resolveAspectRatio(options: Pick<GenerateImageOptions, "size" | "aspect
 
 interface MiniMaxResponse {
   data?: {
-    image?: string;
+    image_urls?: string[];
+    image_base64?: string[];
   };
   base_resp?: {
     status_code?: number;
@@ -65,13 +67,24 @@ async function extractImageFromResponse(result: MiniMaxResponse): Promise<Buffer
     throw new Error(`MiniMax error: ${result.base_resp.status_msg}`);
   }
 
-  const imageData = result.data?.image;
-  if (!imageData) {
-    throw new Error("No image in MiniMax response");
+  // Try base64 first
+  const base64Image = result.data?.image_base64?.[0];
+  if (base64Image) {
+    return Buffer.from(base64Image, "base64");
   }
 
-  // Image is base64 encoded
-  return Buffer.from(imageData, "base64");
+  // Try URL
+  const url = result.data?.image_urls?.[0];
+  if (url) {
+    const imageResponse = await fetch(url);
+    if (!imageResponse.ok) {
+      throw new Error(`Failed to download image: ${imageResponse.status}`);
+    }
+    const arrayBuffer = await imageResponse.arrayBuffer();
+    return Buffer.from(arrayBuffer);
+  }
+
+  throw new Error("No image in MiniMax response");
 }
 
 // ---------------------------------------------------------------------------
@@ -85,7 +98,9 @@ export class MiniMaxProvider implements ImageProvider {
   private readonly baseUrl: string;
 
   constructor(baseUrl?: string) {
-    this.baseUrl = (baseUrl ?? "https://api.minimax.chat")
+    // MiniMax base URL: https://api.minimaxi.com
+    // The API endpoint will be: /v1/image_generation
+    this.baseUrl = (baseUrl ?? "https://api.minimaxi.com")
       .replace(/\/+$/g, "");
   }
 
@@ -102,13 +117,23 @@ export class MiniMaxProvider implements ImageProvider {
     const resolvedModel = model || this.defaultModel;
     const aspectRatio = resolveAspectRatio(options);
 
-    const url = `${this.baseUrl}/v1/image/generation`;
+    // Build URL with proper path handling
+    let baseUrl = this.baseUrl;
+    if (!baseUrl.endsWith("/v1")) {
+      baseUrl = `${baseUrl}/v1`;
+    }
+    const url = `${baseUrl}/image_generation`;
 
-    const body = {
+    const body: Record<string, unknown> = {
       model: resolvedModel,
       prompt,
+      response_format: "base64",
       aspect_ratio: aspectRatio,
     };
+
+    if (options.n && options.n > 1) {
+      body.n = options.n;
+    }
 
     const response = await fetch(url, {
       method: "POST",

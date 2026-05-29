@@ -2,6 +2,7 @@
  * Google Gemini image generation provider.
  *
  * Uses the Gemini API with /v1beta/models/{model}:generateContent endpoint.
+ * Reference: https://github.com/jimliu/baoyu-skills/blob/main/skills/baoyu-image-gen/scripts/providers/google.ts
  */
 
 import type {
@@ -49,8 +50,15 @@ export class GoogleProvider implements ImageProvider {
   private readonly baseUrl: string;
 
   constructor(baseUrl?: string) {
-    this.baseUrl = (baseUrl ?? "https://generativelanguage.googleapis.com/v1beta")
+    // Google Gemini base URL: https://generativelanguage.googleapis.com
+    // The API endpoint will be: /v1beta/models/{model}:generateContent
+    this.baseUrl = (baseUrl ?? "https://generativelanguage.googleapis.com")
       .replace(/\/+$/g, "");
+  }
+
+  private getModelPath(model: string): string {
+    const modelId = model.startsWith("models/") ? model.slice("models/".length) : model;
+    return `models/${modelId}`;
   }
 
   async generateImage(
@@ -64,21 +72,26 @@ export class GoogleProvider implements ImageProvider {
     }
 
     const resolvedModel = model || this.defaultModel;
+    const modelPath = this.getModelPath(resolvedModel);
 
-    const url = `${this.baseUrl}/models/${resolvedModel}:generateContent?key=${apiKey}`;
+    // Build URL with proper base path handling
+    let baseUrl = this.baseUrl;
+    if (!baseUrl.endsWith("/v1beta")) {
+      baseUrl = `${baseUrl}/v1beta`;
+    }
+    const url = `${baseUrl}/${modelPath}:generateContent`;
 
     const body = {
       contents: [
         {
+          role: "user",
           parts: [
-            {
-              text: prompt,
-            },
+            { text: prompt },
           ],
         },
       ],
       generationConfig: {
-        responseModalities: ["TEXT", "IMAGE"],
+        responseModalities: ["IMAGE"],
       },
     };
 
@@ -86,6 +99,7 @@ export class GoogleProvider implements ImageProvider {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
       },
       body: JSON.stringify(body),
     });

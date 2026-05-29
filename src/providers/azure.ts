@@ -2,6 +2,7 @@
  * Azure OpenAI image generation provider.
  *
  * Uses the Azure OpenAI API with /openai/deployments/{deployment}/images/generations endpoint.
+ * Reference: https://github.com/jimliu/baoyu-skills/blob/main/skills/baoyu-image-gen/scripts/providers/azure.ts
  */
 
 import type {
@@ -133,10 +134,20 @@ export class AzureProvider implements ImageProvider {
   private readonly apiVersion: string;
 
   constructor(config?: Partial<AzureConfig>) {
+    // Azure OpenAI base URL: https://your-resource.openai.azure.com
     this.baseUrl = (config?.baseUrl ?? "https://your-resource.openai.azure.com")
       .replace(/\/+$/g, "");
     this.deployment = config?.deployment ?? "gpt-image-2";
     this.apiVersion = config?.apiVersion ?? "2025-04-01-preview";
+  }
+
+  private buildURL(deployment: string, pathSuffix: string): string {
+    // Parse base URL to extract resource base URL
+    let resourceBaseURL = this.baseUrl;
+    if (!resourceBaseURL.endsWith("/openai")) {
+      resourceBaseURL = `${resourceBaseURL}/openai`;
+    }
+    return `${resourceBaseURL}/deployments/${encodeURIComponent(deployment)}${pathSuffix}?api-version=${this.apiVersion}`;
   }
 
   async generateImage(
@@ -153,11 +164,12 @@ export class AzureProvider implements ImageProvider {
     const size = resolveSize(options);
     const quality = resolveQuality(options.quality ?? "2k");
 
-    const url = `${this.baseUrl}/openai/deployments/${deployment}/images/generations?api-version=${this.apiVersion}`;
+    const url = this.buildURL(deployment, "/images/generations");
 
     const body: Record<string, unknown> = {
       prompt,
       size,
+      n: 1,
     };
 
     if (quality !== undefined) {

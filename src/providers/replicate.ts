@@ -2,6 +2,7 @@
  * Replicate image generation provider.
  *
  * Uses the Replicate API with /v1/predictions endpoint.
+ * Reference: https://github.com/jimliu/baoyu-skills/blob/main/skills/baoyu-image-gen/scripts/providers/replicate.ts
  */
 
 import type {
@@ -11,66 +12,59 @@ import type {
 import { ProviderError } from "./types";
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function parseModelId(model: string): { owner: string; name: string; version: string | null } {
+  const [ownerName, version] = model.split(":");
+  const parts = ownerName!.split("/");
+  if (parts.length !== 2 || !parts[0] || !parts[1]) {
+    throw new Error(
+      `Invalid Replicate model format: "${model}". Expected "owner/name" or "owner/name:version".`
+    );
+  }
+  return { owner: parts[0], name: parts[1], version: version || null };
+}
+
+// ---------------------------------------------------------------------------
 // Response handling
 // ---------------------------------------------------------------------------
 
-interface ReplicatePrediction {
+interface PredictionResponse {
   id: string;
   status: string;
-  output?: string | string[];
-  error?: string;
+  output: unknown;
+  error: string | null;
+  urls?: { get?: string };
 }
 
-async function waitForPrediction(predictionId: string, apiKey: string, maxAttempts = 60): Promise<string[]> {
-  const url = `https://api.replicate.com/v1/predictions/${predictionId}`;
+function extractOutputUrl(prediction: PredictionResponse): string {
+  const output = prediction.output;
 
-  for (let i = 0; i < maxAttempts; i++) {
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-      },
-    });
+  if (typeof output === "string") return output;
 
-    if (!response.ok) {
-      throw new Error(`Failed to get prediction: ${response.status}`);
+  if (Array.isArray(output)) {
+    if (output.length !== 1) {
+      throw new Error(
+        `Replicate returned ${output.length} outputs, but we currently support saving exactly one image per request.`
+      );
     }
-
-    const prediction = (await response.json()) as ReplicatePrediction;
-
-    if (prediction.status === "succeeded") {
-      const output = prediction.output;
-      if (Array.isArray(output)) {
-        return output;
-      }
-      if (typeof output === "string") {
-        return [output];
-      }
-      throw new Error("No output in prediction");
-    }
-
-    if (prediction.status === "failed" || prediction.status === "canceled") {
-      throw new Error(`Replicate prediction failed: ${prediction.error}`);
-    }
-
-    // Wait before polling again
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const first = output[0];
+    if (typeof first === "string") return first;
   }
 
-  throw new Error("Replicate prediction timed out");
+  if (output && typeof output === "object" && "url" in output) {
+    const url = (output as Record<string, unknown>).url;
+    if (typeof url === "string") return url;
+  }
+
+  throw new Error(`Unexpected Replicate output format: ${JSON.stringify(output)}`);
 }
 
-async function extractImageFromUrls(urls: string[]): Promise<Buffer> {
-  const imageUrl = urls[0];
-  if (!imageUrl) {
-    throw new Error("No image URL in Replicate response");
-  }
-
-  const imageResponse = await fetch(imageUrl);
-  if (!imageResponse.ok) {
-    throw new Error(`Failed to download image: ${imageResponse.status}`);
-  }
-
-  const arrayBuffer = await imageResponse.arrayBuffer();
+async function downloadImage(url: string): Promise<Buffer> {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Failed to download image from Replicate: ${res.status}`);
+  const arrayBuffer = await res.arrayBuffer();
   return Buffer.from(arrayBuffer);
 }
 
@@ -85,7 +79,8 @@ export class ReplicateProvider implements ImageProvider {
   private readonly baseUrl: string;
 
   constructor(baseUrl?: string) {
-    this.baseUrl = (baseUrl ?? "https://api.replicate.com/v1")
+    // Replicate base URL: https://api.replicate.com
+    this.baseUrl = (baseUrl ?? "https://api.replicate.com")
       .replace(/\/+$/g, "");
   }
 
@@ -100,22 +95,32 @@ export class ReplicateProvider implements ImageProvider {
     }
 
     const resolvedModel = model || this.defaultModel;
+    const parsedModel = parseModelId(resolvedModel);
 
-    const url = `${this.baseUrl}/predictions`;
-
-    const body = {
-      version: resolvedModel,
-      input: {
-        prompt,
-        aspect_ratio: options.aspectRatio ?? "1:1",
-      },
+    const input: Record<string, unknown> = {
+      prompt,
     };
+
+    if (options.aspectRatio) {
+      input.aspect_ratio = options.aspectRatio;
+    }
+
+    let url: string;
+    const body: Record<string, unknown> = { input };
+
+    if (parsedModel.version) {
+      url = `${this.baseUrl}/v1/predictions`;
+      body.version = parsedModel.version;
+    } else {
+      url = `${this.baseUrl}/v1/models/${parsedModel.owner}/${parsedModel.name}/predictions`;
+    }
 
     const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
+        Prefer: "wait=60",
       },
       body: JSON.stringify(body),
     });
@@ -125,11 +130,46 @@ export class ReplicateProvider implements ImageProvider {
       throw new ProviderError("replicate", response.status, `Replicate API error (${response.status}): ${errText}`);
     }
 
-    const prediction = (await response.json()) as ReplicatePrediction;
+    let prediction = (await response.json()) as PredictionResponse;
 
-    // Wait for prediction to complete
-    const imageUrls = await waitForPrediction(prediction.id, apiKey);
-    return extractImageFromUrls(imageUrls);
+    // If not succeeded, poll for results
+    if (prediction.status !== "succeeded") {
+      if (!prediction.urls?.get) {
+        throw new Error("Replicate prediction did not return a poll URL");
+      }
+
+      const pollUrl = prediction.urls.get;
+      const maxPollMs = 300_000;
+      const pollIntervalMs = 2000;
+      const start = Date.now();
+
+      while (Date.now() - start < maxPollMs) {
+        const pollResponse = await fetch(pollUrl, {
+          headers: { Authorization: `Bearer ${apiKey}` },
+        });
+
+        if (!pollResponse.ok) {
+          const errText = await pollResponse.text();
+          throw new Error(`Replicate poll error (${pollResponse.status}): ${errText}`);
+        }
+
+        prediction = (await pollResponse.json()) as PredictionResponse;
+
+        if (prediction.status === "succeeded") break;
+        if (prediction.status === "failed" || prediction.status === "canceled") {
+          throw new Error(`Replicate prediction ${prediction.status}: ${prediction.error || "unknown error"}`);
+        }
+
+        await new Promise((r) => setTimeout(r, pollIntervalMs));
+      }
+
+      if (prediction.status !== "succeeded") {
+        throw new Error("Replicate prediction timed out");
+      }
+    }
+
+    const outputUrl = extractOutputUrl(prediction);
+    return downloadImage(outputUrl);
   }
 }
 
